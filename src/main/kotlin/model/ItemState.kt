@@ -41,7 +41,6 @@ class ItemState(
         }
     }
 
-    override fun toString(): String {
-        return "($item, $up)"
-    }
+    override fun toString() = "($item, $up)"
+    fun toShortString() = item.toShortString() + if (item != Items.EMPTY) up.toShortString() else ""
 }

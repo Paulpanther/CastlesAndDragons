@@ -30,6 +30,10 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
 
     fun isEmpty(x: Int, y: Int) = this[x, y].item == Items.EMPTY
 
+    fun clear() {
+        itemStates.indices.forEach { itemStates[it] = ItemState(Items.EMPTY, this) }
+    }
+
     override fun neighborsOf(itemState: ItemState): OrientationMap<Neighbor> {
         if (itemState.item.type == ItemType.EMPTY) {
             throw IllegalArgumentException("Cannot find neighbors of empty item")
@@ -77,14 +81,22 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
         }
     }
 
+    private fun toRectArray(): List<List<ItemState>> {
+        return (0 until height).map { y -> (0 until width).map { x -> this[x, y] } }
+    }
+
     override fun iterator(): Iterator<GridIterator.Element> {
         return GridIterator(this)
     }
 
     override fun toString(): String {
-        val rows = (0 until height).map { y -> (0 until width).map { x -> this[x, y] } }
+        val rows = toRectArray()
         val rowsStrings = rows.map { it.joinToString("\t|\t", "\t") }
         return rowsStrings.joinToString("\n", "Grid:\n", "\n")
+    }
+
+    fun toShortString(): String {
+        return itemStates.joinToString("", "${width}w${height}h") { it.toShortString() }
     }
 }
 

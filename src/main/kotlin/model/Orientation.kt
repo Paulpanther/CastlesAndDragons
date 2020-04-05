@@ -8,7 +8,7 @@ data class OrientationMap<T>(
         private val north: T,
         private val west: T,
         private val south: T,
-        private val east: T) {
+        private val east: T): Iterable<T> {
 
     operator fun get(orientation: Orientation): T {
         return when(orientation) {
@@ -17,6 +17,10 @@ data class OrientationMap<T>(
             Orientation.SOUTH -> south
             Orientation.EAST -> east
         }
+    }
+
+    override fun iterator(): Iterator<T> {
+        return listOf(north, west, south, east).iterator()
     }
 }
 
@@ -35,7 +39,15 @@ class Orientations<T> {
 }
 
 fun Orientation.toLocal(up: Orientation) = Orientation.values()[(this.ordinal + up.ordinal) % 4]
-
 fun Orientation.toWorld(up: Orientation) = Orientation.values()[(this.ordinal - up.ordinal) % 4]
-
 fun Orientation.opposite() = Orientation.values()[(this.ordinal + 2) % 4]
+
+val shortOrientations = mapOf(
+        Orientation.NORTH to "n",
+        Orientation.WEST to "w",
+        Orientation.SOUTH to "s",
+        Orientation.EAST to "e"
+)
+
+fun Orientation.toShortString() = shortOrientations[this]?: "?"
+
