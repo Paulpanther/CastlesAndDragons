@@ -1,4 +1,4 @@
-package main.kotlin.model
+package model
 
 interface NeighborSupplier {
     fun neighborsOf(itemState: ItemState): OrientationMap<Neighbor>

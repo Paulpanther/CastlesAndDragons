@@ -1,4 +1,4 @@
-package main.kotlin.model
+package model
 
 enum class Orientation {
     NORTH, WEST, SOUTH, EAST
@@ -34,16 +34,8 @@ class Orientations<T> {
     }
 }
 
-object OrientationTransformer {
-    fun worldToLocal(world: Orientation, up: Orientation): Orientation {
-        return Orientation.values()[(world.ordinal + up.ordinal) % 4]
-    }
+fun Orientation.toLocal(up: Orientation) = Orientation.values()[(this.ordinal + up.ordinal) % 4]
 
-    fun localToWorld(local: Orientation, up: Orientation): Orientation {
-        return Orientation.values()[(local.ordinal - up.ordinal) % 4]
-    }
+fun Orientation.toWorld(up: Orientation) = Orientation.values()[(this.ordinal - up.ordinal) % 4]
 
-    fun opposite(orientation: Orientation): Orientation {
-        return Orientation.values()[(orientation.ordinal + 2) % 4]
-    }
-}
+fun Orientation.opposite() = Orientation.values()[(this.ordinal + 2) % 4]

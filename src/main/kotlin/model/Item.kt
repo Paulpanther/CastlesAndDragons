@@ -1,4 +1,4 @@
-package main.kotlin.model
+package model
 
 enum class ItemType {
     CASTLE, DRAGON, STREET, EMPTY
@@ -22,6 +22,9 @@ class Item(
         it.east = east
     }.build()
 
+    override fun toString(): String {
+        return "Item (type = $type)"
+    }
 }
 
 object Items {

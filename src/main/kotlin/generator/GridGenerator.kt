@@ -1,4 +1,4 @@
-package main.kotlin.generator
+package generator
 
 class GridGenerator {
 

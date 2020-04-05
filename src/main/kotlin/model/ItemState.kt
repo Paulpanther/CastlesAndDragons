@@ -1,4 +1,4 @@
-package main.kotlin.model
+package model
 
 
 class ItemState(
@@ -7,20 +7,20 @@ class ItemState(
         val up: Orientation = Orientation.NORTH) {
 
     fun isConnectionWithNeighborValid(directionWorld: Orientation): Boolean {
-        val directionLocal = OrientationTransformer.worldToLocal(directionWorld, up)
+        val directionLocal = directionWorld.toLocal(up)
         val neighbor = neighborSupplier.neighborsOf(this)[directionWorld]
         val street = item.streets[directionLocal]
 
         return if (neighbor.type == NeighborType.ITEM) {
-            val neighborStreet = neighbor.itemState!!.streetAt(OrientationTransformer.opposite(directionWorld))
+            val neighborStreet = neighbor.itemState!!.streetAt(directionWorld.opposite())
             isStreetToStreetValid(street, neighborStreet, neighbor.itemState.item.type)
         } else {
-            isStreetToEmptyValid(street)
+            true
         }
     }
 
-    fun streetAt(directionWorld: Orientation): StreetType {
-        val directionLocal = OrientationTransformer.worldToLocal(directionWorld, up)
+    private fun streetAt(directionWorld: Orientation): StreetType {
+        val directionLocal = directionWorld.toLocal(up)
         return item.streets[directionLocal]
     }
 
@@ -41,7 +41,7 @@ class ItemState(
         }
     }
 
-    private fun isStreetToEmptyValid(street: StreetType): Boolean {
-        return item.type == ItemType.DRAGON || street == StreetType.NONE
+    override fun toString(): String {
+        return "($item, $up)"
     }
 }
