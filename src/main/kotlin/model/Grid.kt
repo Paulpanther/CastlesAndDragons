@@ -1,7 +1,5 @@
 package model
 
-data class Pos(var x: Int, var y: Int)
-
 class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIterator.Element> {
 
     private val itemStates = Array(width * height) { ItemState(Items.EMPTY, this) }
@@ -12,9 +10,15 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
         return itemStates[y * width + x]
     }
 
+    operator fun get(pos: Pos) = get(pos.x, pos.y)
+
     operator fun set(x: Int, y: Int, itemState: ItemState) {
         check(x, y)
         itemStates[y * width + x] = itemState
+    }
+
+    operator fun set(pos: Pos, itemState: ItemState) {
+        set(pos.x, pos.y, itemState)
     }
 
     fun setItem(x: Int, y: Int, item: Item, up: Orientation = Orientation.NORTH) {
@@ -32,6 +36,15 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
 
     fun clear() {
         itemStates.indices.forEach { itemStates[it] = ItemState(Items.EMPTY, this) }
+    }
+
+    fun heroStartPos(): Pos {
+        return when {
+            heroPos.x == -1 -> heroPos + Pos(1, 0)
+            heroPos.x == width -> heroPos - Pos(1, 0)
+            heroPos.y == -1 -> heroPos + Pos(0, 1)
+            else -> heroPos - Pos(0, 1)
+        }
     }
 
     override fun neighborsOf(itemState: ItemState): OrientationMap<Neighbor> {

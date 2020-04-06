@@ -1,7 +1,5 @@
-import util.Random
+import generator.GridGenerator
 
 fun main(args: Array<String>) {
-    for (i in 0 until 100) {
-        println(Random.shuffle(listOf(1, 2, 3, 4, 5)))
-    }
+    println(GridGenerator().generateRandom(15, 5))
 }

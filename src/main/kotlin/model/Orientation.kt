@@ -51,3 +51,17 @@ val shortOrientations = mapOf(
 
 fun Orientation.toShortString() = shortOrientations[this]?: "?"
 
+fun Orientation.flipXAxis(): Orientation {
+    return if (this == Orientation.NORTH || this == Orientation.SOUTH)
+        this
+    else
+        this.opposite()
+}
+
+fun Orientation.flipYAxis(): Orientation {
+    return if (this == Orientation.WEST || this == Orientation.EAST)
+        this
+    else
+        this.opposite()
+}
+

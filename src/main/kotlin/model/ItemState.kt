@@ -4,7 +4,7 @@ package model
 class ItemState(
         val item: Item,
         private val neighborSupplier: NeighborSupplier,
-        val up: Orientation = Orientation.NORTH) {
+        var up: Orientation = Orientation.NORTH) {
 
     fun isConnectionWithNeighborValid(directionWorld: Orientation): Boolean {
         val directionLocal = directionWorld.toLocal(up)
