@@ -1,8 +1,4 @@
-@file:Suppress("DEPRECATION")
-
 package util
-
-import kotlin.js.Math
 
 object Random {
     fun <T> shuffle(list: List<T>): List<T> {
