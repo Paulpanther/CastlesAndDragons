@@ -33,29 +33,23 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
                 val newClient = Client(conn)
                 clients.add(newClient)
                 listeners.forEach { it.onJoined(newClient) }
-                println("New Connection: ${conn.remoteSocketAddress}")
+                println("New Connection: ${conn.remoteSocketAddress.address.hostAddress}")
             }
         }
     }
 
-    override fun onMessage(conn: WebSocket?, message: String?) {
-        println(message)
+    override fun onMessage(conn: WebSocket?, str: String?) {
+        val parsed = Message.parse(str)
+        notifyListeners(conn) { l, c -> l.onMessage(c, parsed) }
     }
 
     override fun onClose(conn: WebSocket?, code: Int, reason: String?, remote: Boolean) {
-        val client = clientFromSocket(conn)
-        if (client != null) {
-            listeners.forEach { it.onLeave(client) }
-        }
-        error("Socket closed")
+        notifyListeners(conn) { l, c -> l.onLeave(c) }
     }
 
     override fun onError(conn: WebSocket?, ex: Exception?) {
-        val client = clientFromSocket(conn)
-        if (client != null) {
-            listeners.forEach { it.onLeave(client) }
-        }
-        error("Socket failure")
+        notifyListeners(conn) { l, c -> l.onLeave(c) }
+        println("Error")
     }
 
     fun addListener(listener: ClientListener) {
@@ -64,6 +58,10 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
 
     fun removeListener(listener: ClientListener) {
         listeners.remove(listener)
+    }
+
+    private fun notifyListeners(conn: WebSocket?, run: (ClientListener, Client) -> Unit) {
+        clientFromSocket(conn)?.let { client -> listeners.forEach { l -> run(l, client) } }
     }
 
     private fun clientFromSocket(socket: WebSocket?) = clients.find { it.socket == socket }
@@ -78,7 +76,7 @@ open class ClientListener {
     }
 
     fun onJoined(client: Client) {}
-    fun onUpdateName(client: Client, name: String) {}
+    fun onMessage(client: Client, message: Message) {}
     fun onLeave(client: Client) {}
 
     fun stopListening() {
