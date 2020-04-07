@@ -1,42 +1,57 @@
 package server
 
-import okhttp3.Response
-import okhttp3.WebSocket
-import okhttp3.WebSocketListener
+import org.java_websocket.WebSocket
+import org.java_websocket.handshake.ClientHandshake
+import org.java_websocket.server.WebSocketServer
+import java.lang.Exception
+import java.net.InetSocketAddress
 
-object Clients : WebSocketListener() {
+const val PORT = 6789
+
+object Clients: WebSocketServer(InetSocketAddress(PORT)) {
 
     private val clients = mutableListOf<Client>()
     private val listeners = mutableListOf<ClientListener>()
 
-    override fun onOpen(webSocket: WebSocket?, response: Response?) {
-        super.onOpen(webSocket, response)
-        if (webSocket != null) {
-            val existing = clients.find { it.socket == webSocket }
+    fun runServer() {
+        start()
+        println("Websocket server running on port ${this.port}")
+
+        Runtime.getRuntime().addShutdownHook(Thread {
+            println("Shutdown")
+            stop(1000)
+        })
+    }
+
+
+    override fun onStart() {}
+
+    override fun onOpen(conn: WebSocket?, handshake: ClientHandshake?) {
+        if (conn != null) {
+            val existing = clients.find { it.socket == conn }
             if (existing == null) {
-                val newClient = Client(webSocket)
+                val newClient = Client(conn)
                 clients.add(newClient)
                 listeners.forEach { it.onJoined(newClient) }
+                println("New Connection: ${conn.remoteSocketAddress}")
             }
         }
     }
 
-    override fun onMessage(webSocket: WebSocket?, text: String?) {
-        super.onMessage(webSocket, text)
+    override fun onMessage(conn: WebSocket?, message: String?) {
+        println(message)
     }
 
-    override fun onClosed(webSocket: WebSocket?, code: Int, reason: String?) {
-        super.onClosed(webSocket, code, reason)
-        val client = clientFromSocket(webSocket)
+    override fun onClose(conn: WebSocket?, code: Int, reason: String?, remote: Boolean) {
+        val client = clientFromSocket(conn)
         if (client != null) {
             listeners.forEach { it.onLeave(client) }
         }
         error("Socket closed")
     }
 
-    override fun onFailure(webSocket: WebSocket?, t: Throwable?, response: Response?) {
-        super.onFailure(webSocket, t, response)
-        val client = clientFromSocket(webSocket)
+    override fun onError(conn: WebSocket?, ex: Exception?) {
+        val client = clientFromSocket(conn)
         if (client != null) {
             listeners.forEach { it.onLeave(client) }
         }
