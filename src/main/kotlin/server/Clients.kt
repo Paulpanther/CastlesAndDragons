@@ -76,10 +76,16 @@ class Client(
         val id: Int,
         val socket: WebSocket,
         var name: String,
-        var grid: Grid? = null) {
+        var level: Int = 0) {
+
+    lateinit var grid: Grid
 
     fun send(text: String) {
         socket.send(text)
+    }
+
+    fun reset() {
+        level = 0
     }
 }
 

@@ -11,7 +11,9 @@ object Response {
             = join(type("startGame"), v("size", width.toString(), height.toString()))
     fun setGrid(client: Client, grid: Grid)
             = join(type("setGrid"), client(client), v("grid", grid.toShortString()))
-    fun finished(client: Client) = join(type("finished"), client(client))
+    fun finished(client: Client) = join(type("finished"), client(client), v("level", client.level.toString()))
+    fun notFinished(client: Client) = join(type("notFinished"), client(client))
+    fun won(client: Client) = join(type("won"), client(client))
 
     private fun client(client: Client) = v("client", client.id.toString(), client.name)
     private fun type(type: String) = v("type", type)
