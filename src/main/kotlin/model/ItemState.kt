@@ -20,7 +20,9 @@ class ItemState(
         val neighbors = neighborSupplier.neighborsOf(this)
         return Orientation.values().filter {
             val neighbor = neighbors[it]
-            neighbor.type == NeighborType.ITEM && isConnectionWithItemValid(neighbor, it)
+            neighbor.type == NeighborType.ITEM &&
+                    streetAt(it) != StreetType.NONE &&
+                    neighbor.itemState!!.streetAt(it.opposite()) == streetAt(it)
         }.map { neighbors[it].itemState!! }
     }
 

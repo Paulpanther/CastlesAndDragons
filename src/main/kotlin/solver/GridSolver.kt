@@ -8,7 +8,7 @@ class GridSolver(private val grid: Grid) {
         fun isFinished(grid: Grid, hardness: Int) = GridSolver(grid).isFinished(hardness)
     }
 
-    fun findAllConnections(pos: ItemState, found: Set<ItemState> = mutableSetOf()): Set<ItemState> {
+    fun findAllConnections(pos: ItemState, found: Set<ItemState> = setOf(pos)): Set<ItemState> {
         val connections = pos.getConnectedNeighbors()
         val newConnections = connections.filter { it !in found }
         val allFound = (found + newConnections).toMutableSet()
