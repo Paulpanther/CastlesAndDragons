@@ -7,21 +7,34 @@ class ItemState(
         var up: Orientation = Orientation.NORTH) {
 
     fun isConnectionWithNeighborValid(directionWorld: Orientation): Boolean {
-        val directionLocal = directionWorld.toLocal(up)
         val neighbor = neighborSupplier.neighborsOf(this)[directionWorld]
-        val street = item.streets[directionLocal]
 
         return if (neighbor.type == NeighborType.ITEM) {
-            val neighborStreet = neighbor.itemState!!.streetAt(directionWorld.opposite())
-            isStreetToStreetValid(street, neighborStreet, neighbor.itemState.item.type)
+            isConnectionWithItemValid(neighbor, directionWorld)
         } else {
             true
         }
     }
 
-    private fun streetAt(directionWorld: Orientation): StreetType {
+    fun getConnectedNeighbors(): List<ItemState> {
+        val neighbors = neighborSupplier.neighborsOf(this)
+        return Orientation.values().filter {
+            val neighbor = neighbors[it]
+            neighbor.type == NeighborType.ITEM && isConnectionWithItemValid(neighbor, it)
+        }.map { neighbors[it].itemState!! }
+    }
+
+    fun streetAt(directionWorld: Orientation): StreetType {
         val directionLocal = directionWorld.toLocal(up)
         return item.streets[directionLocal]
+    }
+
+    private fun isConnectionWithItemValid(neighbor: Neighbor, directionWorld: Orientation): Boolean {
+        val directionLocal = directionWorld.toLocal(up)
+        val street = item.streets[directionLocal]
+
+        val neighborStreet = neighbor.itemState!!.streetAt(directionWorld.opposite())
+        return isStreetToStreetValid(street, neighborStreet, neighbor.itemState.item.type)
     }
 
     private fun isStreetToStreetValid(ourStreet: StreetType, neighborStreet: StreetType, neighborType: ItemType): Boolean {

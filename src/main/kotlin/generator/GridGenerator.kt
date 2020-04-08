@@ -8,6 +8,7 @@ class GridGenerator {
     fun generateRandom(width: Int, height: Int): Grid {
         val grid = Grid(width, height)
         val items = chooseItems()
+        grid.startItems = items
         choosePositions(items, grid)
         this.chooseRotation(grid)
         chooseHeroPos(grid)

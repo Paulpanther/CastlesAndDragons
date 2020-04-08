@@ -1,5 +1,6 @@
 package server
 
+import model.Grid
 import org.java_websocket.WebSocket
 import org.java_websocket.handshake.ClientHandshake
 import org.java_websocket.server.WebSocketServer
@@ -10,7 +11,7 @@ const val PORT = 6789
 
 object Clients: WebSocketServer(InetSocketAddress(PORT)) {
 
-    private val clients = mutableListOf<Client>()
+    val clients = mutableListOf<Client>()
     private val listeners = mutableListOf<ClientListener>()
 
     fun runServer() {
@@ -30,7 +31,8 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
         if (conn != null) {
             val existing = clients.find { it.socket == conn }
             if (existing == null) {
-                val newClient = Client(conn)
+                val newClient = Client(IdGenerator.generateId(allIds()),
+                        conn, NameGenerator.generateName(allNames()))
                 clients.add(newClient)
                 listeners.forEach { it.onJoined(newClient) }
                 println("New Connection: ${conn.remoteSocketAddress.address.hostAddress}")
@@ -60,6 +62,9 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
         listeners.remove(listener)
     }
 
+    private fun allNames() = clients.map { it.name }
+    private fun allIds() = clients.map { it.id }
+
     private fun notifyListeners(conn: WebSocket?, run: (ClientListener, Client) -> Unit) {
         clientFromSocket(conn)?.let { client -> listeners.forEach { l -> run(l, client) } }
     }
@@ -67,7 +72,16 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
     private fun clientFromSocket(socket: WebSocket?) = clients.find { it.socket == socket }
 }
 
-class Client(val socket: WebSocket)
+class Client(
+        val id: Int,
+        val socket: WebSocket,
+        var name: String,
+        var grid: Grid? = null) {
+
+    fun send(text: String) {
+        socket.send(text)
+    }
+}
 
 open class ClientListener {
 
@@ -75,11 +89,26 @@ open class ClientListener {
         Clients.addListener(this)
     }
 
-    fun onJoined(client: Client) {}
-    fun onMessage(client: Client, message: Message) {}
-    fun onLeave(client: Client) {}
+    open fun onJoined(client: Client) {}
+    open fun onMessage(client: Client, message: Message) {}
+    open fun onLeave(client: Client) {}
 
     fun stopListening() {
         Clients.removeListener(this)
+    }
+
+    fun broadcast(text: String) {
+        Clients.broadcast(text)
+    }
+
+    protected fun sendToSome(textMapper: (Client) -> String?) {
+        for (client in Clients.clients) {
+            val text = textMapper(client)
+            text?.let { client.send(text) }
+        }
+    }
+
+    protected fun sendTo(clients: List<Client>, text: String) {
+        sendToSome { if (it in clients) text else null }
     }
 }

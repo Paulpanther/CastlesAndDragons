@@ -2,6 +2,7 @@ package model
 
 class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIterator.Element> {
 
+    var startItems = listOf<Item>()
     private val itemStates = Array(width * height) { ItemState(Items.EMPTY, this) }
     var heroPos = Pos(0, -1)
 
@@ -47,18 +48,21 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
         }
     }
 
+    fun posOf(itemState: ItemState): Pos {
+        return Pos.fromIndex(itemStates.indexOf(itemState), width)
+    }
+
     override fun neighborsOf(itemState: ItemState): OrientationMap<Neighbor> {
         if (itemState.item.type == ItemType.EMPTY) {
             throw IllegalArgumentException("Cannot find neighbors of empty item")
         }
         val index = itemStates.indexOf(itemState)
-        val x = index % width
-        val y = index / width
+        val pos = Pos.fromIndex(index, width)
         return Orientations<Neighbor>().apply {
-            north = neighborAt(x, y - 1)
-            west = neighborAt(x - 1, y)
-            south = neighborAt(x, y + 1)
-            east = neighborAt(x + 1, y)
+            north = neighborAt(pos.x, pos.y - 1)
+            west = neighborAt(pos.x - 1, pos.y)
+            south = neighborAt(pos.x, pos.y + 1)
+            east = neighborAt(pos.x + 1, pos.y)
         }.build()
     }
 
@@ -120,15 +124,14 @@ class GridIterator(private val grid: Grid) : Iterator<GridIterator.Element> {
     override fun hasNext() = index < grid.width * grid.height
 
     override fun next(): Element {
-        val x = index % grid.width
-        val y = index / grid.width
-        index++
-        return Element(x, y, grid[x, y])
+        val pos = Pos.fromIndex(index++, grid.width)
+        return Element(pos.x, pos.y, grid[pos])
     }
 
     data class Element(
             val x: Int,
             val y: Int,
-            val itemState: ItemState
-    )
+            val itemState: ItemState) {
+        val pos = Pos(x, y)
+    }
 }
