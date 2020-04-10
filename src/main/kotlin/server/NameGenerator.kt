@@ -10,4 +10,6 @@ object NameGenerator {
         } while (namesInUse.contains(name))
         return name
     }
+
+    fun validName(name: String) = name.matches("[a-zA-Z0-9_]+".toRegex())
 }

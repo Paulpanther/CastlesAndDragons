@@ -43,10 +43,10 @@ fun Orientation.toWorld(up: Orientation) = Orientation.values()[(this.ordinal - 
 fun Orientation.opposite() = Orientation.values()[(this.ordinal + 2) % 4]
 
 val shortOrientations = mapOf(
-        Orientation.NORTH to "n",
-        Orientation.WEST to "w",
-        Orientation.SOUTH to "s",
-        Orientation.EAST to "e"
+        Orientation.NORTH to "0",
+        Orientation.WEST to "1",
+        Orientation.SOUTH to "2",
+        Orientation.EAST to "3"
 )
 
 fun Orientation.toShortString() = shortOrientations[this]?: "?"

@@ -10,8 +10,6 @@ enum class MessageType {
     NAME, MOVE, FINISHED, INVALID
 }
 
-val typeStrings = MessageType.values().map { it.name }
-
 open class Message(
         val type: MessageType
 ) {
@@ -23,7 +21,7 @@ open class Message(
                 val args = message.split(";")
 
                 val typeStr = findValue(args, "type")
-                when (MessageType.values().find { it.name == typeStr }) {
+                when (MessageType.values().find { it.name.toLowerCase() == typeStr?.toLowerCase() }) {
                     MessageType.NAME -> parseName(args)
                     MessageType.MOVE -> parseMove(args)
                     MessageType.FINISHED -> Message(MessageType.FINISHED)
@@ -37,14 +35,12 @@ open class Message(
 
         private fun parseName(args: List<String>): Message {
             val nameStr = findValue(args, "name")
-            return if (validName(nameStr)) {
-                NameMessage(nameStr!!)
+            return if (nameStr != null) {
+                NameMessage(nameStr)
             } else {
                 Message(MessageType.INVALID)
             }
         }
-
-        private fun validName(name: String?) = name != null && name.matches("[a-zA-Z0-9_]*".toRegex())
 
         private fun parseMove(args: List<String>): Message {
             val from = parsePos(findValue(args, "from"))

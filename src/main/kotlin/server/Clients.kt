@@ -18,12 +18,21 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
         start()
         println("Websocket server running on port ${this.port}")
 
-        Runtime.getRuntime().addShutdownHook(Thread {
-            println("Shutdown")
-            stop(1000)
-        })
+        Runtime.getRuntime().addShutdownHook(Thread { shutdown() })
+
+        run@ do {
+            when (readLine()) {
+                "exit" -> break@run
+                "clear" -> clients.clear()
+            }
+        } while (true)
+        shutdown()
     }
 
+    fun shutdown() {
+        println("Shutdown")
+        stop()
+    }
 
     override fun onStart() {}
 
@@ -41,6 +50,7 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
     }
 
     override fun onMessage(conn: WebSocket?, str: String?) {
+        println("New Message: $str")
         val parsed = Message.parse(str)
         notifyListeners(conn) { l, c -> l.onMessage(c, parsed) }
     }
@@ -81,6 +91,7 @@ class Client(
     lateinit var grid: Grid
 
     fun send(text: String) {
+        println("Sending: $text")
         socket.send(text)
     }
 
