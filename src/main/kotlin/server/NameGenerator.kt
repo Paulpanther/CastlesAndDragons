@@ -11,5 +11,5 @@ object NameGenerator {
         return name
     }
 
-    fun validName(name: String) = name.matches("[a-zA-Z0-9_]+".toRegex())
+    fun validName(taken: List<String>, name: String) = name !in taken && name.matches("[a-zA-Z0-9_]+".toRegex())
 }

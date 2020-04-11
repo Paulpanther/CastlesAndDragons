@@ -5,10 +5,15 @@ import model.Grid
 object Response {
 
     val ERROR_INVALID_NAME = error("invalidName")
+    val ERROR_ROOM_FULL = error("room_full")
 
+    fun gameStartsIn(delay: Long)
+            = join(type("gameStartsIn"), v("delay", delay.toString()))
+    fun gameStartStopped() = type("gameStartStopped")
     fun nameAndId(client: Client) = join(type("nameAndId"), client(client))
+    fun setPlayers(ids: List<String>, names: List<String>)
+            = join(type("setPlayers"), v("ids", *ids.toTypedArray()), v("names", *names.toTypedArray()))
     fun left(client: Client) = join(type("left"), client(client))
-    fun joined(client: Client) = join(type("joined"), client(client))
     fun changedName(client: Client) = join(type("changedName"), client(client))
     fun startGame(width: Int, height: Int)
             = join(type("startGame"), v("size", width.toString(), height.toString()))

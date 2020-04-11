@@ -61,6 +61,10 @@ export class Message {
         return this.args.find(arg => arg[0] === key)[1]
     }
 
+    public getMultiple(key: string): string[] {
+        return this.get(key).split(",");
+    }
+
     public static newName(newName: string) { return Message.join(this.type("name"), this.v("name", newName)) }
 
     private static type(type: string) { return Message.v("type", type) }

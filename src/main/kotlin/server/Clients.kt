@@ -44,7 +44,6 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
                         conn, NameGenerator.generateName(allNames()))
                 clients.add(newClient)
                 listeners.forEach { it.onJoined(newClient) }
-                println("New Connection: ${conn.remoteSocketAddress.address.hostAddress}")
             }
         }
     }
@@ -61,7 +60,7 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
 
     override fun onError(conn: WebSocket?, ex: Exception?) {
         notifyListeners(conn) { l, c -> l.onLeave(c) }
-        println("Error")
+        println("Error: ${ex.toString()}")
     }
 
     fun addListener(listener: ClientListener) {
@@ -92,7 +91,11 @@ class Client(
 
     fun send(text: String) {
         println("Sending: $text")
-        socket.send(text)
+        if (socket.isOpen) {
+            socket.send(text)
+        } else {
+            println("ERROR: Connection not open. Did not send: $text")
+        }
     }
 
     fun reset() {
