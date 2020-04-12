@@ -3,19 +3,23 @@ package server
 import generator.GridGenerator
 import model.Grid
 import solver.GridSolver
+import util.DelayTimer
 import util.ListExt.without
 
-const val WIDTH = 15
-const val HEIGHT = 5
+const val WIDTH = 5
+const val HEIGHT = 3
+const val GAME_DELAY = 8000
 
 class Game(private val players: List<Client>): ClientListener() {
 
     private var running = false
     private val playersInGame = players.toMutableList()
+    private val delayTimer = DelayTimer("gameDelay", GAME_DELAY, this::generateGrid)
 
     init {
         players.forEach { it.grid = Grid(WIDTH, HEIGHT) }
-        sendTo(players, Response.startGame(WIDTH, HEIGHT, 8000))
+        sendTo(players, Response.startGame(WIDTH, HEIGHT, GAME_DELAY))
+        delayTimer.restart()
         println("Start Game")
     }
 
@@ -71,6 +75,7 @@ class Game(private val players: List<Client>): ClientListener() {
     override fun onLeave(client: Client) {
         if (client in players) {
             sendTo(players.without(client), Response.left(client))
+            delayTimer.stop()
             stopListening()
             Server.closeGame(players)
         }

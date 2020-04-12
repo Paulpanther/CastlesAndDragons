@@ -7,7 +7,7 @@ object Response {
     val ERROR_INVALID_NAME = error("invalidName")
     val ERROR_ROOM_FULL = error("room_full")
 
-    fun gameStartsIn(delay: Long)
+    fun gameStartsIn(delay: Int)
             = join(type("gameStartsIn"), v("delay", delay.toString()))
     fun gameStartStopped() = type("gameStartStopped")
     fun nameAndId(client: Client) = join(type("nameAndId"), client(client))

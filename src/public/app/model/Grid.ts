@@ -16,20 +16,23 @@ export default class Grid {
         let pos = str.indexOf("h") + 1;
         const itemsArr: Item[] = [];
         while (pos < str.length) {
-            const item = parseInt(str[pos]);
+            const item = parseInt(str[pos], 16);
             if (item === 0) {
                 itemsArr.push(new Item(item));
                 pos++;
+                console.log("0");
             } else {
                 const up = parseInt(str[pos + 1]);
                 itemsArr.push(new Item(item, up));
                 pos += 2;
+                console.log(item);
             }
         }
 
+        console.log(itemsArr);
         for (let i = 0; i < itemsArr.length; i++) {
             const x = i % this.width;
-            const y = Math.floor(i / this.height);
+            const y = Math.floor(i / this.width);
             this.items[y][x] = itemsArr[i];
         }
     }

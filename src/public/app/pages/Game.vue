@@ -39,7 +39,6 @@
                 this.others = event.others;
 
                 this.grid = new Grid(this.gameWidth, this.gameHeight);
-                console.log(this.grid);
                 this.gameStartTime = Date.now() + this.gameStartsDelay;
                 this.isGameStarting = true;
                 this.gameStartTick();
@@ -58,13 +57,13 @@
 
         public setGrid(message: Message) {
             const forPlayer = Player.parse(message.get("client"));
-            if (forPlayer.id == this.self.id) {
+            if (forPlayer.id === this.self.id) {
                 this.grid.setFromParsed(message.get("grid"));
+                this.$forceUpdate();
             }
         }
 
         public classForItem(y: number, x: number): string {
-            // console.log(`${x}, ${y}`);
             const item = this.grid.items[y][x];
             const rotClass = `rot-${item.up}`;
             const typeClass = `item-${item.type}`;
@@ -99,7 +98,6 @@
 }
 
 #game .board .row .slot {
-    background: tomato;
     margin: 5px;
     flex: 1 0 auto;
     height: auto;

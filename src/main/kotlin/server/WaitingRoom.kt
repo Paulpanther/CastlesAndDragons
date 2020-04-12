@@ -1,16 +1,16 @@
 package server
 
-import util.ListExt.without
-import java.util.*
-import kotlin.concurrent.schedule
+import util.DelayTimer
 
 const val MAX_PLAYERS = 4
-const val GAME_STARTS_TIME = 10000L
+const val GAME_STARTS_TIME = 10000
 
 class WaitingRoom(private val players: MutableList<Client> = mutableListOf()) : ClientListener() {
 
-    private var gameStartsTimer = Timer("gameStarts", true)
-    private var timerIsRunning = false
+    private val timer = DelayTimer("gameStarts", GAME_STARTS_TIME,
+            this::startGame,
+            { sendTo(players, Response.gameStartsIn(GAME_STARTS_TIME)) },
+            { sendTo(players, Response.gameStartStopped()) })
 
     override fun onJoined(client: Client) {
         if (players.size + 1 <= MAX_PLAYERS) {
@@ -19,8 +19,8 @@ class WaitingRoom(private val players: MutableList<Client> = mutableListOf()) : 
             sendPlayersList()
             println("Player joined: ${client.id}, ${client.name}")
 
-            if (players.size >= MAX_PLAYERS && !timerIsRunning) {
-                restartGameTimer()
+            if (players.size >= MAX_PLAYERS && !timer.isRunning) {
+                timer.restart()
             }
         } else {
             client.send(Response.ERROR_ROOM_FULL)
@@ -48,29 +48,9 @@ class WaitingRoom(private val players: MutableList<Client> = mutableListOf()) : 
     override fun onLeave(client: Client) {
         println("left: ${client.name}")
         if (client in players) {
-            stopGameTimer()
             players.remove(client)
+            timer.stop()
             sendPlayersList()
-        }
-    }
-
-    private fun restartGameTimer() {
-        if (timerIsRunning) {
-            gameStartsTimer.cancel()
-        }
-
-        timerIsRunning = true
-        sendTo(players, Response.gameStartsIn(GAME_STARTS_TIME))
-        gameStartsTimer.schedule(GAME_STARTS_TIME) {
-            startGame()
-        }
-    }
-
-    private fun stopGameTimer() {
-        if (timerIsRunning) {
-            gameStartsTimer.cancel()
-            timerIsRunning = false
-            sendTo(players, Response.gameStartStopped())
         }
     }
 
