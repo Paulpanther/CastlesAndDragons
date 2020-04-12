@@ -3,7 +3,9 @@
         .board
             .row(v-for="y in parseInt(gameHeight)" :key="y")
                 .slot(v-for="x in parseInt(gameWidth)" :key="x")
-                    .item(:class="classForItem(y - 1, x - 1)")
+                    .item(:class="classForPos(y - 1, x - 1)")
+        .drawer
+            .item(v-for="item in drawerItems" :key="item.type" :class="classForItem(item)")
         h4(v-if="isGameStarting") Game starts in: {{ gameStartsCountdown }}
 </template>
 
@@ -13,6 +15,7 @@
     import Player from "../model/Player";
     import Grid from "../model/Grid";
     import {EventBus} from "../App.vue";
+    import Item from "../model/Item";
 
     @Component
     export default class Game extends ConnectionListener {
@@ -21,6 +24,7 @@
         public gameHeight: number = 0;
 
         private grid: Grid;
+        public drawerItems: Item[] = Item.startItems();
 
         public gameStartsDelay: number;
         public gameStartTime: number;
@@ -43,6 +47,15 @@
                 this.isGameStarting = true;
                 this.gameStartTick();
             });
+            this.testSet()
+        }
+
+        public testSet() {
+            this.gameWidth = 5;
+            this.gameHeight = 3;
+            this.gameStartsDelay = 0;
+            this.grid = new Grid(5, 3);
+            this.grid.items[2][2] = new Item(3, 1);
         }
 
         public onMessage(message: Message) {
@@ -63,8 +76,12 @@
             }
         }
 
-        public classForItem(y: number, x: number): string {
+        public classForPos(y: number, x: number): string {
             const item = this.grid.items[y][x];
+            return this.classForItem(item);
+        }
+
+        public classForItem(item: Item): string {
             const rotClass = `rot-${item.up}`;
             const typeClass = `item-${item.type}`;
             return `${rotClass} ${typeClass}`;
@@ -112,6 +129,20 @@
 #game .board .row .slot .item {
     width: 100%;
     height: 100%;
+    background-size: cover;
+}
+
+#game .drawer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+#game .drawer .item {
+    margin: 10px;
+    width: 100px;
+    height: 100px;
     background-size: cover;
 }
 
