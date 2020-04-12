@@ -54,9 +54,15 @@
                 this.isGameStarting = true;
                 this.gameStartTick();
             });
-            document.addEventListener("mousemove", (event) => {
+            document.addEventListener("mousemove", (event: MouseEvent) => {
                 if (this.freeItem !== null) {
                     this.freeItemPos = new Pos(event.x, event.y);
+                }
+            });
+            document.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (this.freeItem !== null && event.key === "r") {
+                    this.freeItem.up = (this.freeItem.up + 1) % 4;
+                    this.$forceUpdate();
                 }
             });
             this.testSet()
@@ -221,7 +227,6 @@
     position: absolute;
     pointer-events: none;
     touch-action: none;
-    transform: translate(-50px, -50px);
 }
 
 .item-0 { background-image: url("../assets/empty.png") }
