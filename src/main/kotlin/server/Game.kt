@@ -15,7 +15,7 @@ class Game(private val players: List<Client>): ClientListener() {
 
     init {
         players.forEach { it.grid = Grid(WIDTH, HEIGHT) }
-        sendTo(players, Response.startGame(WIDTH, HEIGHT))
+        sendTo(players, Response.startGame(WIDTH, HEIGHT, 8000))
         println("Start Game")
     }
 

@@ -1,14 +1,16 @@
 <template lang="pug">
     div
-        Game(game-width="15" game-height="5")
-<!--        WaitingRoom(v-show="!inGame" v-on:gamestart="startGame")-->
-<!--        Game(v-show="inGame")-->
+        WaitingRoom(v-show="!inGame" v-on:gamestart="startGame($event)")
+        Game(v-show="inGame")
 </template>
 
 <script lang="ts">
+    import Vue from "vue";
     import WaitingRoom from "./pages/WaitingRoom.vue";
     import Game from "./pages/Game.vue";
     import Connection from "./Connection";
+
+    export const EventBus = new Vue();
 
     Connection.init();
 
@@ -19,11 +21,10 @@
                 inGame: false
             }
         },
-        methods: {
-            startGame: function() {
-                console.log("Starting Game");
+        created() {
+            EventBus.$on("gamestart", () => {
                 this.inGame = true;
-            }
+            });
         }
     }
 </script>

@@ -18,6 +18,7 @@
     import * as _ from "lodash";
     import {ConnectionListener, Message} from "../Connection";
     import Player from "../model/Player";
+    import {EventBus} from "../App.vue";
 
     @Component
     export default class WaitingRoom extends ConnectionListener {
@@ -98,7 +99,14 @@
         }
 
         private onGameStarts(message: Message) {
-            this.$emit("gamestart");
+            const size = message.getMultiple("size");
+            EventBus.$emit("gamestart", {
+                gameWidth: size[0],
+                gameHeight: size[1],
+                gameDelay: message.get("delay"),
+                self: this.self,
+                others: this.connectedPlayers
+            });
         }
 
         private tick() {

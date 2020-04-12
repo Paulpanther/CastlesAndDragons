@@ -4,7 +4,13 @@ export default class Grid {
 
     public items: Item[][] = [];
 
-    constructor(public width: number, public height: number) {}
+    constructor(public width: number, public height: number) {
+        this.items = [...Array(height)].map(row => {
+            return [...Array(width)].map(item => {
+                return Item.empty();
+            })
+        });
+    }
 
     public setFromParsed(str: string) {
         let pos = str.indexOf("h") + 1;
