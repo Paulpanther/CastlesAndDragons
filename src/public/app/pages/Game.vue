@@ -2,8 +2,8 @@
     #game
         .board
             .row(v-for="y in parseInt(gameHeight)" :key="y")
-                .slot(v-for="x in parseInt(gameWidth)" :key="x")
-                    .item(:class="classForPos(y - 1, x - 1)")
+                .slot(v-for="x in parseInt(gameWidth)" :key="x" v-on:click="onSlotClick(y-1, x-1, $event)")
+                    .item(:class="classForPos(y-1, x-1)")
         .drawer(v-on:click="onDrawerClick()")
             .item(v-for="item in drawerItems" :key="item.type" :class="classForItem(item)" v-on:click="onItemClick(item, $event)")
         .free-items
@@ -98,13 +98,11 @@
                 }
                 this.justHadItemClick = true;
             }
-            console.log("Item");
         }
 
         public onDrawerClick() {
             if (this.justHadItemClick) {
                 this.justHadItemClick = false;
-                console.log("No");
                 return;
             }
 
@@ -113,11 +111,28 @@
                 this.drawerItems = _.sortBy(this.drawerItems, i => i.type);
                 this.freeItem = null;
             }
-            console.log("Drawer");
         }
 
-        public onSlotClicked(x: number, y: number) {
+        public onSlotClick(y: number, x: number, event) {
+            if (this.justHadItemClick) {
+                this.justHadItemClick = false;
+                return;
+            }
 
+            const itemAtPos = this.grid.items[y][x];
+            if (this.freeItem !== null) {
+                if (itemAtPos.type === 0) {
+                    this.grid.items[y][x] = this.freeItem;
+                    this.freeItem = null;
+                    this.$forceUpdate(); // TODO
+                }
+            } else {
+                if (itemAtPos.type !== 0) {
+                    this.grid.items[y][x] = Item.empty();
+                    this.freeItem = itemAtPos;
+                    this.freeItemPos = new Pos(event.x, event.y);
+                }
+            }
         }
 
         public classForPos(y: number, x: number): string {
@@ -181,6 +196,7 @@
 #game .board .row .slot .item {
     width: 100%;
     height: 100%;
+    border: 1px solid black;
 }
 
 #game .drawer {
