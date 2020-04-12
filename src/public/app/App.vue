@@ -1,7 +1,8 @@
 <template lang="pug">
     div
-        WaitingRoom(v-show="!inGame" v-on:gamestart="startGame")
-        Game(v-show="inGame")
+        Game(game-width="15" game-height="5")
+<!--        WaitingRoom(v-show="!inGame" v-on:gamestart="startGame")-->
+<!--        Game(v-show="inGame")-->
 </template>
 
 <script lang="ts">
