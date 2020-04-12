@@ -1,15 +1,28 @@
 <template lang="pug">
-    WaitingRoom
+    div
+        WaitingRoom(v-show="!inGame" v-on:gamestart="startGame")
+        Game(v-show="inGame")
 </template>
 
 <script lang="ts">
-    import Vue from "vue"
     import WaitingRoom from "./pages/WaitingRoom.vue";
+    import Game from "./pages/Game.vue";
     import Connection from "./Connection";
 
     Connection.init();
 
     export default {
-        components: { WaitingRoom }
+        components: { WaitingRoom, Game },
+        data() {
+            return {
+                inGame: false
+            }
+        },
+        methods: {
+            startGame: function() {
+                console.log("Starting Game");
+                this.inGame = true;
+            }
+        }
     }
 </script>

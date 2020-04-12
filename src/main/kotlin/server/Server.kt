@@ -2,8 +2,11 @@ package server
 
 object Server {
 
+    private val rooms = mutableListOf<WaitingRoom>()
+    private val games = mutableListOf<Game>()
+
     fun start() {
-        WaitingRoom()
+        rooms += WaitingRoom()
         Clients.runServer()
     }
 
@@ -12,6 +15,12 @@ object Server {
     }
 
     fun startGame(players: List<Client>) {
+        games += Game(players)
+    }
 
+    fun reset() {
+        rooms.forEach { it.stopListening() }
+        games.forEach { it.stopListening() }
+        rooms += WaitingRoom()
     }
 }

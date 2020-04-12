@@ -13,7 +13,6 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
     import Component from "vue-class-component";
     import {Watch} from "vue-property-decorator";
     import * as _ from "lodash";
@@ -42,6 +41,7 @@
                 case "setPlayers": return this.onSetPlayers(message);
                 case "gameStartsIn": return this.onGameStartsIn(message);
                 case "gameStartStopped": return this.onGameStartStopped(message);
+                case "gameStart": return this.onGameStarts(message);
                 case "error": return this.callMethodForError(message);
             }
         }
@@ -95,6 +95,10 @@
 
         private onGameStartStopped(message: Message) {
             this.isGameStarting = false;
+        }
+
+        private onGameStarts(message: Message) {
+            this.$emit("gamestart");
         }
 
         private tick() {

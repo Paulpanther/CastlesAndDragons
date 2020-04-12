@@ -24,12 +24,18 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
             when (readLine()) {
                 "exit" -> break@run
                 "clear" -> clients.clear()
+                "restart" -> restart()
             }
         } while (true)
         shutdown()
     }
 
-    fun shutdown() {
+    private fun restart() {
+        clients.clear()
+        Server.reset()
+    }
+
+    private fun shutdown() {
         println("Shutdown")
         stop()
     }
