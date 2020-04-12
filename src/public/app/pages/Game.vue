@@ -4,18 +4,22 @@
             .row(v-for="y in parseInt(gameHeight)" :key="y")
                 .slot(v-for="x in parseInt(gameWidth)" :key="x")
                     .item(:class="classForPos(y - 1, x - 1)")
-        .drawer
-            .item(v-for="item in drawerItems" :key="item.type" :class="classForItem(item)")
+        .drawer(v-on:click="onDrawerClick()")
+            .item(v-for="item in drawerItems" :key="item.type" :class="classForItem(item)" v-on:click="onItemClick(item, $event)")
+        .free-items
+            .item(v-if="freeItem !== null" :class="classForItem(freeItem)" v-bind:style="{ top: freeItemPos.y + 'px', left: freeItemPos.x + 'px' }")
         h4(v-if="isGameStarting") Game starts in: {{ gameStartsCountdown }}
 </template>
 
 <script lang="ts">
     import {ConnectionListener, Message} from "../Connection";
     import Component from "vue-class-component";
+    import * as _ from "lodash";
     import Player from "../model/Player";
     import Grid from "../model/Grid";
     import {EventBus} from "../App.vue";
     import Item from "../model/Item";
+    import Pos from "../model/Pos";
 
     @Component
     export default class Game extends ConnectionListener {
@@ -25,6 +29,9 @@
 
         private grid: Grid;
         public drawerItems: Item[] = Item.startItems();
+        public freeItem: Item = null;
+        public freeItemPos: Pos = new Pos(0, 0);
+        private justHadItemClick = false;
 
         public gameStartsDelay: number;
         public gameStartTime: number;
@@ -46,6 +53,11 @@
                 this.gameStartTime = Date.now() + this.gameStartsDelay;
                 this.isGameStarting = true;
                 this.gameStartTick();
+            });
+            document.addEventListener("mousemove", (event) => {
+                if (this.freeItem !== null) {
+                    this.freeItemPos = new Pos(event.x, event.y);
+                }
             });
             this.testSet()
         }
@@ -76,6 +88,38 @@
             }
         }
 
+        public onItemClick(item: Item, event) {
+            if (this.freeItem === null) {
+                const inDrawer = this.drawerItems.findIndex(i => i.type === item.type);
+                if (inDrawer !== -1) {
+                    this.drawerItems.splice(inDrawer, 1);
+                    this.freeItem = item;
+                    this.freeItemPos = new Pos(event.x, event.y);
+                }
+                this.justHadItemClick = true;
+            }
+            console.log("Item");
+        }
+
+        public onDrawerClick() {
+            if (this.justHadItemClick) {
+                this.justHadItemClick = false;
+                console.log("No");
+                return;
+            }
+
+            if (this.freeItem !== null) {
+                this.drawerItems.push(this.freeItem);
+                this.drawerItems = _.sortBy(this.drawerItems, i => i.type);
+                this.freeItem = null;
+            }
+            console.log("Drawer");
+        }
+
+        public onSlotClicked(x: number, y: number) {
+
+        }
+
         public classForPos(y: number, x: number): string {
             const item = this.grid.items[y][x];
             return this.classForItem(item);
@@ -102,7 +146,15 @@
     height: 100vh;
 }
 
+#game .item {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+}
+
 #game .board {
+    position: relative;
+    z-index: 0;
     width: 100%;
     background: #00ff00;
 }
@@ -129,7 +181,6 @@
 #game .board .row .slot .item {
     width: 100%;
     height: 100%;
-    background-size: cover;
 }
 
 #game .drawer {
@@ -141,9 +192,20 @@
 
 #game .drawer .item {
     margin: 10px;
-    width: 100px;
-    height: 100px;
-    background-size: cover;
+}
+
+#game .free-items {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+}
+
+#game .free-items .item {
+    position: absolute;
+    pointer-events: none;
+    touch-action: none;
+    transform: translate(-50px, -50px);
 }
 
 .item-0 { background-image: url("../assets/empty.png") }
