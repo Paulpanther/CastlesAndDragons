@@ -4,6 +4,7 @@
             .row(v-for="y in parseInt(gameHeight)" :key="y")
                 .slot(v-for="x in parseInt(gameWidth)" :key="x" v-on:click="onSlotClick(y-1, x-1, $event)")
                     .item(:class="classForPos(y-1, x-1)")
+        button#finish(v-on:click="finish") Finish
         .drawer(v-on:click="onDrawerClick()")
             .item(v-for="item in drawerItems" :key="item.type" :class="classForItem(item)" v-on:click="onItemClick(item, $event)")
         .free-items
@@ -38,6 +39,8 @@
         public isGameStarting = false;
         public gameStartsCountdown = 0;
 
+        public finished = false;
+
         public self: Player;
         public others: Player[];
 
@@ -65,7 +68,7 @@
                     this.$forceUpdate();
                 }
             });
-            this.testSet()
+            // this.testSet()
         }
 
         public testSet() {
@@ -126,19 +129,24 @@
             }
 
             const itemAtPos = this.grid.items[y][x];
-            if (this.freeItem !== null) {
+            if (this.freeItem !== null && !this.finished) {
                 if (itemAtPos.type === 0) {
                     this.grid.items[y][x] = this.freeItem;
+                    this.send(Message.addItem(new Pos(x, y), this.freeItem));
                     this.freeItem = null;
-                    this.$forceUpdate(); // TODO
+                    this.$forceUpdate();
                 }
-            } else {
-                if (itemAtPos.type !== 0) {
-                    this.grid.items[y][x] = Item.empty();
-                    this.freeItem = itemAtPos;
-                    this.freeItemPos = new Pos(event.x, event.y);
-                }
+            } else if (!Item.pickableTypes().includes(itemAtPos.type) && !this.finished) {
+                this.grid.items[y][x] = Item.empty();
+                this.freeItem = itemAtPos;
+                this.freeItemPos = new Pos(event.x, event.y);
+                this.send(Message.removeItem(new Pos(x,y), itemAtPos));
             }
+        }
+
+        public finish() {
+            this.send(Message.finished());
+            this.finished = true;
         }
 
         public classForPos(y: number, x: number): string {
@@ -156,6 +164,8 @@
             if (this.isGameStarting && this.gameStartTime > Date.now()) {
                 setTimeout(this.gameStartTick, 1000);
                 this.gameStartsCountdown = Math.floor((this.gameStartTime - Date.now()) / 1000);
+            } else {
+                this.isGameStarting = false;
             }
         }
     }

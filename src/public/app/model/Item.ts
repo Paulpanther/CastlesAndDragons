@@ -5,6 +5,10 @@ export default class Item {
         return new Item(0);
     }
 
+    public static pickableTypes(): number[] {
+        return [0, 9, 10, 11, 12, 13, 14];
+    }
+
     public static startItems(): Item[] {
         return [
             new Item(1),

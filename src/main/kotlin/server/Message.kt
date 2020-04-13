@@ -1,9 +1,7 @@
 package server
 
-import model.Item
-import model.Items
-import model.Orientation
-import model.Pos
+import model.*
+import util.ListExt.reverse
 import java.lang.Exception
 
 enum class MessageType {
@@ -47,6 +45,7 @@ open class Message(
             val to = parsePos(findValue(args, "to"))
             val up = parseOrientation(findValue(args, "up"))
             val item = parseItem(findValue(args, "item"))
+            println("MOVE: $from $to $up $item")
 
             if ((from != null || to != null && up != null) && item != null) {
                 return MoveMessage(from, to, up, item)
@@ -68,14 +67,11 @@ open class Message(
         }
 
         private fun parseOrientation(str: String?): Orientation? {
-            return str?.let { o -> Orientation.values().find { it.name.toLowerCase() == o } }
+            return shortOrientations.reverse()[str]
         }
 
         private fun parseItem(str: String?): Item? {
-            return str?.let {
-                val possibleItem = Items.shortNames.filterValues { it == str }.keys
-                if (possibleItem.isNotEmpty()) possibleItem.first() else null
-            }
+            return Items.shortNames.reverse()[str]
         }
 
         private fun findValue(args: List<String>, key: String): String? {

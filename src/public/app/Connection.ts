@@ -1,5 +1,7 @@
 import Vue from "vue";
 import Component from "vue-class-component";
+import Pos from "./model/Pos";
+import Item from "./model/Item";
 
 
 export default class Connection {
@@ -41,6 +43,7 @@ export abstract class ConnectionListener extends Vue {
 
     protected send(message: string) {
         Connection.send(message);
+        console.log("Send: " + message);
     }
 
     protected stopListening() {
@@ -65,9 +68,28 @@ export class Message {
         return this.get(key).split(",");
     }
 
+    // #### SEND ####
+
     public static newName(newName: string) { return Message.join(this.type("name"), this.v("name", newName)) }
 
+    public static removeItem(pos: Pos, item: Item) {
+        return Message.join(
+            this.type("move"),
+            this.v("from", pos.x, pos.y),
+            this.v("item", item.type.toString(16)))
+    }
+
+    public static addItem(pos: Pos, item: Item) {
+        return Message.join(
+            this.type("move"),
+            this.v("to", pos.x, pos.y),
+            this.v("up", item.up),
+            this.v("item", item.type.toString(16)));
+    }
+
+    public static finished() { return this.type("finished") }
+
     private static type(type: string) { return Message.v("type", type) }
-    private static v(key: string, value: string) { return `${key}=${value}` }
+    private static v(key: string, ... value: Array<string | number>) { return `${key}=${value.join(",")}` }
     private static join(...parts: string[]) { return parts.join(";") }
 }

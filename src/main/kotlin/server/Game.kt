@@ -29,14 +29,17 @@ class Game(private val players: List<Client>): ClientListener() {
             it.grid = grid
             it.send(Response.setGrid(it, grid))
         }
+        running = true
     }
 
     private fun onMove(client: Client, move: MoveMessage) {
         if (running && client in playersInGame) {
             if (move.from != null) {
+                println("FROM ${move.from.x}")
                 client.grid.setEmpty(move.from.x, move.from.y)
             }
             if (move.to != null && move.up != null) {
+                println("TO ${move.to.x}, ${move.item}:${move.up}")
                 client.grid.setItem(move.to.x, move.to.y, move.item, move.up)
             }
             sendTo(players, Response.setGrid(client, client.grid))
