@@ -136,7 +136,32 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
     }
 
     fun toShortString(): String {
-        return itemStates.joinToString("", "${width}w${height}h") { it.toShortString() }
+        val hero = heroToShortString()
+        return itemStates.joinToString("", "${width}w${height}h${hero}p") { it.toShortString() }
+    }
+
+    private fun heroToShortString(): String {
+        var side = "?"
+        var value = 0
+        when {
+            heroPos.y == -1 -> {
+                side = "0"
+                value = heroPos.x
+            }
+            heroPos.x == -1 -> {
+                side = "1"
+                value = heroPos.y
+            }
+            heroPos.y == height -> {
+                side = "2"
+                value = heroPos.x
+            }
+            heroPos.x == width -> {
+                side = "3"
+                value = heroPos.y
+            }
+        }
+        return "$side$value"
     }
 }
 

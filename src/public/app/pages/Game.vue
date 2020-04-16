@@ -68,7 +68,7 @@
                     this.$forceUpdate();
                 }
             });
-            this.testSet()
+            // this.testSet()
         }
 
         public testSet() {

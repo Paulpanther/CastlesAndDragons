@@ -24,6 +24,7 @@ class RecursiveGenerator(
         // recursively choose items until grid is finished
         chooseNextItem()
 
+        removeStreetsFromGrid()
         return grid
     }
 
@@ -156,6 +157,15 @@ class RecursiveGenerator(
             }
         }
         return true
+    }
+
+    private fun removeStreetsFromGrid() {
+        for (element in grid) {
+            val type = element.itemState.item.type
+            if (type != ItemType.DRAGON && type != ItemType.CASTLE) {
+                grid.setEmpty(element.pos)
+            }
+        }
     }
 
     private fun areCastlesAndDragonsInGrid(): Boolean {

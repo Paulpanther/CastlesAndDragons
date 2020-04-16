@@ -1,8 +1,10 @@
 import Item from "./Item";
+import Pos from "./Pos";
 
 export default class Grid {
 
     public items: Item[][] = [];
+    public heroPos: Pos = null;
 
     constructor(public width: number, public height: number) {
         this.items = [...Array(height)].map(row => {
@@ -13,27 +15,39 @@ export default class Grid {
     }
 
     public setFromParsed(str: string) {
-        let pos = str.indexOf("h") + 1;
+        this.setHeroFromParsed(str);
+
+        let pos = str.indexOf("p") + 1;
         const itemsArr: Item[] = [];
         while (pos < str.length) {
             const item = parseInt(str[pos], 16);
             if (item === 0) {
                 itemsArr.push(new Item(item));
                 pos++;
-                console.log("0");
             } else {
                 const up = parseInt(str[pos + 1]);
                 itemsArr.push(new Item(item, up));
                 pos += 2;
-                console.log(item);
             }
         }
 
-        console.log(itemsArr);
         for (let i = 0; i < itemsArr.length; i++) {
             const x = i % this.width;
             const y = Math.floor(i / this.width);
             this.items[y][x] = itemsArr[i];
+        }
+    }
+
+    private setHeroFromParsed(str: string) {
+        const heroI = str.indexOf("h") + 1;
+        const heroEndI = str.indexOf("p");
+        const side = parseInt(str[heroI]);
+        const value = parseInt(str.substr(heroI + 1, heroEndI));
+        switch (side) {
+            case 0: this.heroPos = new Pos(value, -1); break;
+            case 1: this.heroPos = new Pos(-1, value); break;
+            case 2: this.heroPos = new Pos(value, this.height); break;
+            case 3: this.heroPos = new Pos(this.width, value); break;
         }
     }
 

@@ -1,6 +1,7 @@
 package server
 
 import generator.GridGenerator
+import generator.RecursiveGenerator
 import model.Grid
 import solver.GridSolver
 import util.DelayTimer
@@ -24,7 +25,7 @@ class Game(private val players: List<Client>): ClientListener() {
     }
 
     private fun generateGrid() {
-        val grid = GridGenerator().generateRandom(WIDTH, HEIGHT)
+        val grid = RecursiveGenerator(WIDTH, HEIGHT).generate()
         players.forEach {
             it.grid = grid
             it.send(Response.setGrid(it, grid))
