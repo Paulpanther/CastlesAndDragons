@@ -24,17 +24,40 @@ data class OrientationMap<T>(
     }
 }
 
-class Orientations<T> {
+class MutableOrientationMap<T : Any>: Iterable<T> {
+
     var north: T? = null
     var west: T? = null
     var south: T? = null
     var east: T? = null
 
-    fun build(): OrientationMap<T> {
+    fun toOrientationMap(): OrientationMap<T> {
         if (north == null || west == null || south == null || east == null) {
             throw IllegalStateException("Building not finished, some orientations are not set")
         }
         return OrientationMap(north!!, west!!, south!!, east!!)
+    }
+
+    operator fun get(orientation: Orientation): T? {
+        return when (orientation) {
+            Orientation.NORTH -> north
+            Orientation.WEST -> west
+            Orientation.SOUTH -> south
+            Orientation.EAST -> east
+        }
+    }
+
+    operator fun set(orientation: Orientation, value: T?) {
+        when (orientation) {
+            Orientation.NORTH -> north = value
+            Orientation.WEST -> west = value
+            Orientation.SOUTH -> south = value
+            Orientation.EAST -> east = value
+        }
+    }
+
+    override fun iterator(): Iterator<T> {
+        return listOfNotNull(north, west, south, east).iterator()
     }
 }
 

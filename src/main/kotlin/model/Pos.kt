@@ -22,7 +22,13 @@ data class Pos(var x: Int, var y: Int) {
 
     fun toIndex(width: Int) = y * width + x
 
-    fun orientationTo(other: Pos): Orientation {
+    /**
+     * In which orientation do you have to move to come from this to other.
+     * ```
+     * Pos.whichMoveInOrientation(Pos.moveInOrientation(Orientation)) == Orientation
+     * ```
+     */
+    fun whichMoveOrientation(other: Pos): Orientation {
         return when {
             other.x == x && other.y < y -> Orientation.NORTH
             other.x == x && other.y > y -> Orientation.SOUTH
@@ -32,5 +38,15 @@ data class Pos(var x: Int, var y: Int) {
         }
     }
 
+    fun moveInOrientation(orientation: Orientation): Pos {
+        return when (orientation) {
+            Orientation.NORTH -> Pos(x, y - 1)
+            Orientation.WEST -> Pos(x - 1, y)
+            Orientation.SOUTH -> Pos(x, y + 1)
+            Orientation.EAST -> Pos(x + 1, y)
+        }
+    }
+
     override fun toString() = "($x, $y)"
 }
+

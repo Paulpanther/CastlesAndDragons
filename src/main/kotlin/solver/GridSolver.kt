@@ -40,7 +40,7 @@ class GridSolver(private val grid: Grid) {
 
     private fun heroStartPosConnectedToHero(): Boolean {
         val state = grid[grid.heroStartPos()]
-        val orientation = grid.heroStartPos().orientationTo(grid.heroPos)
+        val orientation = grid.heroStartPos().whichMoveOrientation(grid.heroPos)
         return if (state.item != Items.EMPTY) {
             state.streetAt(orientation) != StreetType.NONE
         } else {

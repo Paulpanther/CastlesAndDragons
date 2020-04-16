@@ -13,47 +13,6 @@ class ModelTest {
     }
 
     @Test
-    fun testGridCreation() {
-        assertTrue(grid.all { it.itemState.item == Items.EMPTY })
-        assertEquals(15, grid.width)
-        assertEquals(5, grid.height)
-    }
-
-    @Test
-    fun testGridSetGet() {
-        grid[3, 4] = state
-        grid.setItem(10, 2, Items.CORNER_1)
-
-        assertEquals(Items.CASTLE_MUD_1, grid[3, 4].item)
-        assertEquals(Orientation.SOUTH, grid[3, 4].up)
-        assertEquals(Items.CORNER_1, grid[10, 2].item)
-        assertEquals(Orientation.NORTH, grid[10, 2].up)
-        assertFalse(grid.isEmpty(10, 2))
-
-        grid.setEmpty(10, 2)
-        assertEquals(Items.EMPTY, grid[10, 2].item)
-        assertTrue(grid.isEmpty(10, 2))
-    }
-
-    @Test
-    fun testGridIterator() {
-        assertEquals(15 * 5, grid.map { it }.size)
-    }
-
-    @Test
-    fun testGridNeighbors() {
-        grid.heroPos = Pos(9, 5)
-        grid[9, 4] = state
-        grid.setItem(10, 4, Items.DRAGON_MUD)
-        val neighbors = grid.neighborsOf(state)
-        assertEquals(NeighborType.HERO, neighbors[Orientation.SOUTH].type)
-        assertNotNull(neighbors[Orientation.WEST].itemState)
-        assertEquals(Items.EMPTY, neighbors[Orientation.WEST].itemState!!.item)
-        assertNotNull(neighbors[Orientation.EAST].itemState)
-        assertEquals(Items.DRAGON_MUD, neighbors[Orientation.EAST].itemState!!.item)
-    }
-
-    @Test
     fun testOrientationTransformer() {
         assertEquals(Orientation.NORTH, Orientation.SOUTH.opposite())
         assertEquals(Orientation.EAST, Orientation.WEST.opposite())
@@ -65,16 +24,21 @@ class ModelTest {
 
         assertEquals(Orientation.WEST, Orientation.EAST.toWorld(Orientation.SOUTH))
         assertEquals(Orientation.SOUTH, Orientation.SOUTH.toWorld(Orientation.NORTH))
+
+        assertEquals(Orientation.WEST, Orientation.EAST.flipXAxis())
+        assertEquals(Orientation.NORTH, Orientation.NORTH.flipXAxis())
+        assertEquals(Orientation.WEST, Orientation.WEST.flipYAxis())
+        assertEquals(Orientation.NORTH, Orientation.SOUTH.flipYAxis())
     }
 
     @Test
     fun testOrientationBuilder() {
-        val orientations = Orientations<Int>().apply {
+        val orientations = MutableOrientationMap<Int>().apply {
             north = 0
             west = 1
             south = 2
             east = 3
-        }.build()
+        }.toOrientationMap()
         assertEquals(0, orientations[Orientation.NORTH])
         assertEquals(1, orientations[Orientation.WEST])
         assertEquals(2, orientations[Orientation.SOUTH])
@@ -110,5 +74,21 @@ class ModelTest {
         assertFalse(state.isConnectionWithNeighborValid(Orientation.WEST), "Connection to three not valid, because streets don't match")
         assertFalse(state.isConnectionWithNeighborValid(Orientation.SOUTH), "Connection to three not valid, because street meets no street")
         assertFalse(state.isConnectionWithNeighborValid(Orientation.EAST), "Connection to castle not valid, because street from castle meets no street")
+    }
+
+    @Test
+    fun testOrientationTo() {
+        assertEquals(Orientation.NORTH, Pos(0, 0).whichMoveOrientation(Pos(0, -1)))
+        assertEquals(Orientation.WEST, Pos(4, 5).whichMoveOrientation(Pos(3, 5)))
+        assertEquals(Orientation.SOUTH, Pos(9, 3).whichMoveOrientation(Pos(9, 4)))
+        assertEquals(Orientation.EAST, Pos(2, 4).whichMoveOrientation(Pos(3, 4)))
+    }
+
+    @Test
+    fun moveInOrientation() {
+        assertEquals(Pos(0, -1), Pos(0, 0).moveInOrientation(Orientation.NORTH))
+        assertEquals(Pos(3, 5), Pos(4, 5).moveInOrientation(Orientation.WEST))
+        assertEquals(Pos(9, 4), Pos(9, 3).moveInOrientation(Orientation.SOUTH))
+        assertEquals(Pos(3, 4), Pos(2, 4).moveInOrientation(Orientation.EAST))
     }
 }

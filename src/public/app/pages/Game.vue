@@ -68,7 +68,7 @@
                     this.$forceUpdate();
                 }
             });
-            // this.testSet()
+            this.testSet()
         }
 
         public testSet() {
@@ -76,7 +76,7 @@
             this.gameHeight = 3;
             this.gameStartsDelay = 0;
             this.grid = new Grid(5, 3);
-            this.grid.items[2][2] = new Item(3, 1);
+            this.grid.setFromParsed("5w3h612191a0040d0e2300f1c180730");
         }
 
         public onMessage(message: Message) {

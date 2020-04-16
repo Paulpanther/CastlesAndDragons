@@ -40,7 +40,7 @@ class Game(private val players: List<Client>): ClientListener() {
             }
             if (move.to != null && move.up != null) {
                 println("TO ${move.to.x}, ${move.item}:${move.up}")
-                client.grid.setItem(move.to.x, move.to.y, move.item, move.up)
+                client.grid.setItem(move.to, move.item, move.up)
             }
             sendTo(players, Response.setGrid(client, client.grid))
         }

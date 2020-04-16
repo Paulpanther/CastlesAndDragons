@@ -15,12 +15,12 @@ class Item(
         south: StreetType = StreetType.NONE,
         east: StreetType = StreetType.NONE) {
 
-    val streets: OrientationMap<StreetType> = Orientations<StreetType>().also {
+    val streets: OrientationMap<StreetType> = MutableOrientationMap<StreetType>().also {
         it.north = north
         it.west = west
         it.south = south
         it.east = east
-    }.build()
+    }.toOrientationMap()
 
     override fun toString(): String {
         return "Item (type = $type)"
@@ -65,4 +65,7 @@ object Items {
             DRAGON_MUD to "e",
             FOUR to "f"
     )
+
+    val all = listOf(EMPTY, LINE_MUD, LINE_STONE, LINE_BOTH, THREE_1, THREE_2, THREE_3, CORNER_1, CORNER_2,
+            CASTLE_STONE_1, CASTLE_STONE_2, CASTLE_MUD_1, CASTLE_MUD_2, DRAGON_STONE, DRAGON_MUD, FOUR)
 }

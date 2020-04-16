@@ -15,6 +15,10 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
 
     operator fun set(x: Int, y: Int, itemState: ItemState) {
         check(x, y)
+        if (itemState.item != Items.EMPTY && any { it.itemState.item == itemState.item }) {
+            throw IllegalArgumentException("Item is already present in grid")
+        }
+
         itemStates[y * width + x] = itemState
     }
 
@@ -22,9 +26,17 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
         set(pos.x, pos.y, itemState)
     }
 
+    fun setItem(pos: Pos, item: Item, up: Orientation = Orientation.NORTH) {
+        setItem(pos.x, pos.y, item, up)
+    }
+
     fun setItem(x: Int, y: Int, item: Item, up: Orientation = Orientation.NORTH) {
         val state = ItemState(item, this, up)
         this[x, y] = state
+    }
+
+    fun setEmpty(pos: Pos) {
+        setEmpty(pos.x, pos.y)
     }
 
     fun setEmpty(x: Int, y: Int): ItemState {
@@ -32,6 +44,8 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
         this[x, y] = ItemState(Items.EMPTY, this)
         return old
     }
+
+    fun isEmpty(pos: Pos) = isEmpty(pos.x, pos.y)
 
     fun isEmpty(x: Int, y: Int) = this[x, y].item == Items.EMPTY
 
@@ -49,21 +63,23 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
     }
 
     fun posOf(itemState: ItemState): Pos {
+        if (itemState.item.type == ItemType.EMPTY) {
+            throw IllegalArgumentException("Cannot find position of empty item")
+        }
         return Pos.fromIndex(itemStates.indexOf(itemState), width)
     }
 
     override fun neighborsOf(itemState: ItemState): OrientationMap<Neighbor> {
-        if (itemState.item.type == ItemType.EMPTY) {
-            throw IllegalArgumentException("Cannot find neighbors of empty item")
-        }
-        val index = itemStates.indexOf(itemState)
-        val pos = Pos.fromIndex(index, width)
-        return Orientations<Neighbor>().apply {
+        return neighborsOf(posOf(itemState))
+    }
+
+    fun neighborsOf(pos: Pos): OrientationMap<Neighbor> {
+        return MutableOrientationMap<Neighbor>().apply {
             north = neighborAt(pos.x, pos.y - 1)
             west = neighborAt(pos.x - 1, pos.y)
             south = neighborAt(pos.x, pos.y + 1)
             east = neighborAt(pos.x + 1, pos.y)
-        }.build()
+        }.toOrientationMap()
     }
 
     private fun neighborAt(x: Int, y: Int): Neighbor {
@@ -89,14 +105,21 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
         }
     }
 
+    fun inGrid(pos: Pos) = inGrid(pos.x, pos.y)
+
+    fun inGrid(x: Int, y: Int) = !(xNotInGrid(x) || yNotInGrid(y))
+
     private fun check(x: Int, y: Int) {
-        if (x >= width || x < 0) {
+        if (xNotInGrid(x)) {
             throw IndexOutOfBoundsException("value of x ($x) not in width ($width)")
         }
-        if (y >= height || y < 0) {
+        if (yNotInGrid(y)) {
             throw IndexOutOfBoundsException("value of y ($y) not in height ($height)")
         }
     }
+
+    private fun xNotInGrid(x: Int) = x >= width || x < 0
+    private fun yNotInGrid(y: Int) = y >= height || y < 0
 
     private fun toRectArray(): List<List<ItemState>> {
         return (0 until height).map { y -> (0 until width).map { x -> this[x, y] } }

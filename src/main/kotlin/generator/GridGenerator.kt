@@ -37,7 +37,7 @@ class GridGenerator {
     private fun chooseRotation(grid: Grid): Boolean {
         // Check if every item has at least 1 empty neighbor tile
         for (item in grid) {
-            if (!grid.isEmpty(item.x, item.y)) {
+            if (!grid.isEmpty(item.pos)) {
                 val neighbors = grid.neighborsOf(item.itemState)
                 val emptyNeighbor = neighbors
                         .indexOfFirst { n -> n.type == NeighborType.ITEM && n.itemState!!.item == Items.EMPTY}
