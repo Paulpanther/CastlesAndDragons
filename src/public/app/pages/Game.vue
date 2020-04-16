@@ -1,15 +1,12 @@
 <template lang="pug">
     #game
-        .board
-            .row(v-for="y in parseInt(gameHeight)" :key="y")
-                .slot(v-for="x in parseInt(gameWidth)" :key="x" v-on:click="onSlotClick(y-1, x-1, $event)")
-                    .item(:class="classForPos(y-1, x-1)")
+        h4(v-if="isGameStarting") Game starts in: {{ gameStartsCountdown }}
+        Board(ref="board", v-on:slot-click="onSlotClick($event)")
         button#finish(v-on:click="finish") Finish
         .drawer(v-on:click="onDrawerClick()")
             .item(v-for="item in drawerItems" :key="item.type" :class="classForItem(item)" v-on:click="onItemClick(item, $event)")
         .free-items
             .item(v-if="freeItem !== null" :class="classForItem(freeItem)" v-bind:style="{ top: freeItemPos.y + 'px', left: freeItemPos.x + 'px' }")
-        h4(v-if="isGameStarting") Game starts in: {{ gameStartsCountdown }}
 </template>
 
 <script lang="ts">
@@ -17,18 +14,15 @@
     import Component from "vue-class-component";
     import * as _ from "lodash";
     import Player from "../model/Player";
-    import Grid from "../model/Grid";
     import {EventBus} from "../App.vue";
     import Item from "../model/Item";
     import Pos from "../model/Pos";
+    import Board, {SlotClickEvent} from "../components/Board.vue";
+    import {classForItem} from "../components/util";
 
-    @Component
+    @Component({ components: {Board} })
     export default class Game extends ConnectionListener {
 
-        public gameWidth: number = 0;
-        public gameHeight: number = 0;
-
-        private grid: Grid;
         public drawerItems: Item[] = Item.startItems();
         public freeItem: Item = null;
         public freeItemPos: Pos = new Pos(0, 0);
@@ -44,18 +38,23 @@
         public self: Player;
         public others: Player[];
 
+        $refs!: {
+            board: Board
+        };
+
         public mounted() {
             EventBus.$on("gamestart", (event) => {
-                this.gameWidth = parseInt(event.gameWidth);
-                this.gameHeight = parseInt(event.gameHeight);
+                this.$refs.board.gameWidth = parseInt(event.gameWidth);
+                this.$refs.board.gameHeight = parseInt(event.gameHeight);
                 this.gameStartsDelay = parseInt(event.gameDelay);
                 this.self = event.self;
+                this.$refs.board.player = event.self;
                 this.others = event.others;
 
-                this.grid = new Grid(this.gameWidth, this.gameHeight);
                 this.gameStartTime = Date.now() + this.gameStartsDelay;
                 this.isGameStarting = true;
                 this.gameStartTick();
+                this.$refs.board.start();
             });
             document.addEventListener("mousemove", (event: MouseEvent) => {
                 if (this.freeItem !== null) {
@@ -68,15 +67,6 @@
                     this.$forceUpdate();
                 }
             });
-            // this.testSet()
-        }
-
-        public testSet() {
-            this.gameWidth = 5;
-            this.gameHeight = 3;
-            this.gameStartsDelay = 0;
-            this.grid = new Grid(5, 3);
-            this.grid.setFromParsed("5w3h612191a0040d0e2300f1c180730");
         }
 
         public onMessage(message: Message) {
@@ -92,8 +82,7 @@
         public setGrid(message: Message) {
             const forPlayer = Player.parse(message.get("client"));
             if (forPlayer.id === this.self.id) {
-                this.grid.setFromParsed(message.get("grid"));
-                this.$forceUpdate();
+                this.$refs.board.updateGrid(message.get("grid"));
             }
         }
 
@@ -122,22 +111,25 @@
             }
         }
 
-        public onSlotClick(y: number, x: number, event) {
+        public onSlotClick(click: SlotClickEvent) {
+            const x = click.x;
+            const y = click.y;
+            const event = click.event;
+
             if (this.justHadItemClick) {
                 this.justHadItemClick = false;
                 return;
             }
 
-            const itemAtPos = this.grid.items[y][x];
+            const itemAtPos = this.$refs.board.getItem(x, y);
             if (this.freeItem !== null && !this.finished) {
                 if (itemAtPos.type === 0) {
-                    this.grid.items[y][x] = this.freeItem;
+                    this.$refs.board.setItem(x, y, this.freeItem);
                     this.send(Message.addItem(new Pos(x, y), this.freeItem));
                     this.freeItem = null;
-                    this.$forceUpdate();
                 }
             } else if (!Item.pickableTypes().includes(itemAtPos.type) && !this.finished) {
-                this.grid.items[y][x] = Item.empty();
+                this.$refs.board.setItem(x, y, Item.empty());
                 this.freeItem = itemAtPos;
                 this.freeItemPos = new Pos(event.x, event.y);
                 this.send(Message.removeItem(new Pos(x,y), itemAtPos));
@@ -149,16 +141,7 @@
             this.finished = true;
         }
 
-        public classForPos(y: number, x: number): string {
-            const item = this.grid.items[y][x];
-            return this.classForItem(item);
-        }
-
-        public classForItem(item: Item): string {
-            const rotClass = `rot-${item.up}`;
-            const typeClass = `item-${item.type}`;
-            return `${rotClass} ${typeClass}`;
-        }
+        public classForItem = classForItem;
 
         private gameStartTick() {
             if (this.isGameStarting && this.gameStartTime > Date.now()) {
@@ -171,92 +154,36 @@
     }
 </script>
 
-<style lang="css">
-#game {
-    width: 100%;
-    height: 100vh;
-}
+<style lang="sass">
 
-#game .item {
-    width: 100px;
-    height: 100px;
-    background-size: cover;
-}
+@use "../components/_items.sass"
 
-#game .board {
-    position: relative;
-    z-index: 0;
-    width: 100%;
-    background: #00ff00;
-}
+#game
+    width: 100%
+    height: 100vh
 
+    .item
+        width: 100px
+        height: 100px
+        background-size: cover
 
-#game .board .row {
-    display: flex;
-    justify-content: space-around;
-    line-height: 30px;
-}
+    .drawer
+        display: flex
+        flex-direction: row
+        flex-wrap: wrap
+        width: 100%
 
-#game .board .row .slot {
-    margin: 5px;
-    flex: 1 0 auto;
-    height: auto;
-}
+        .item
+            margin: 10px
 
-#game .board .row .slot:before {
-    content: "";
-    float: left;
-    padding-top: 100%;
-}
+    .free-items
+        position: absolute
+        z-index: 1
+        top: 0
+        left: 0
 
-#game .board .row .slot .item {
-    width: 100%;
-    height: 100%;
-    border: 1px solid black;
-}
-
-#game .drawer {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 100%;
-}
-
-#game .drawer .item {
-    margin: 10px;
-}
-
-#game .free-items {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-}
-
-#game .free-items .item {
-    position: absolute;
-    pointer-events: none;
-    touch-action: none;
-}
-
-.item-0 { background-image: url("../assets/empty.png") }
-.item-1 { background-image: url("../assets/line_mud.png") }
-.item-2 { background-image: url("../assets/line_stone.png") }
-.item-3 { background-image: url("../assets/line_both.png") }
-.item-4 { background-image: url("../assets/three_1.png") }
-.item-5 { background-image: url("../assets/three_2.png") }
-.item-6 { background-image: url("../assets/three_3.png") }
-.item-7 { background-image: url("../assets/corner_1.png") }
-.item-8 { background-image: url("../assets/corner_2.png") }
-.item-9 { background-image: url("../assets/castle_stone_1.png") }
-.item-10 { background-image: url("../assets/castle_stone_2.png") }
-.item-11 { background-image: url("../assets/castle_mud_1.png") }
-.item-12 { background-image: url("../assets/castle_mud_2.png") }
-.item-13 { background-image: url("../assets/dragon_stone.png") }
-.item-14 { background-image: url("../assets/dragon_mud.png") }
-.item-15 { background-image: url("../assets/four.png") }
-.rot-0 { transform: rotateZ(0deg) }
-.rot-1 { transform: rotateZ(90deg) }
-.rot-2 { transform: rotateZ(180deg) }
-.rot-3 { transform: rotateZ(270deg) }
+        .item
+            position: absolute
+            pointer-events: none
+            touch-action: none
 </style>
