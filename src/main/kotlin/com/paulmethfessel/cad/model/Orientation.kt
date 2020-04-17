@@ -1,4 +1,4 @@
-package model
+package com.paulmethfessel.cad.model
 
 enum class Orientation {
     NORTH, WEST, SOUTH, EAST

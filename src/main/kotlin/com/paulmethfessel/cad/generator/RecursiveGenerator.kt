@@ -1,7 +1,7 @@
-package generator
+package com.paulmethfessel.cad.generator
 
-import model.*
-import util.Random
+import com.paulmethfessel.cad.model.*
+import com.paulmethfessel.cad.util.Random
 
 class RecursiveGenerator(
         private val width: Int,

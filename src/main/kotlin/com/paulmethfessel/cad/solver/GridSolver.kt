@@ -1,6 +1,6 @@
-package solver
+package com.paulmethfessel.cad.solver
 
-import model.*
+import com.paulmethfessel.cad.model.*
 
 class GridSolver(private val grid: Grid) {
 

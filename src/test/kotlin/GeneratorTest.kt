@@ -1,9 +1,9 @@
-import generator.RecursiveGenerator
-import generator.connect
-import model.Grid
-import model.Items
-import model.Orientation
-import model.Pos
+import com.paulmethfessel.cad.generator.RecursiveGenerator
+import com.paulmethfessel.cad.generator.connect
+import com.paulmethfessel.cad.model.Grid
+import com.paulmethfessel.cad.model.Items
+import com.paulmethfessel.cad.model.Orientation
+import com.paulmethfessel.cad.model.Pos
 import kotlin.test.*
 
 class GeneratorTest {

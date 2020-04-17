@@ -1,7 +1,7 @@
-package generator
+package com.paulmethfessel.cad.generator
 //
 //import model.*
-//import util.Random
+//import com.paulmethfessel.cad.Random
 //
 //class TreeGridGenerator(private val width: Int, private val height: Int) {
 //

@@ -1,11 +1,10 @@
-package server
+package com.paulmethfessel.cad.server
 
-import generator.GridGenerator
-import generator.RecursiveGenerator
-import model.Grid
-import solver.GridSolver
-import util.DelayTimer
-import util.ListExt.without
+import com.paulmethfessel.cad.generator.RecursiveGenerator
+import com.paulmethfessel.cad.model.Grid
+import com.paulmethfessel.cad.solver.GridSolver
+import com.paulmethfessel.cad.util.DelayTimer
+import com.paulmethfessel.cad.util.ListExt.without
 
 const val WIDTH = 5
 const val HEIGHT = 3

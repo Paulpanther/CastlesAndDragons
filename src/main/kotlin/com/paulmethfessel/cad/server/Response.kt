@@ -1,6 +1,6 @@
-package server
+package com.paulmethfessel.cad.server
 
-import model.Grid
+import com.paulmethfessel.cad.model.Grid
 
 object Response {
 

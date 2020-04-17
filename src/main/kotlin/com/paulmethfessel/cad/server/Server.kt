@@ -1,4 +1,4 @@
-package server
+package com.paulmethfessel.cad.server
 
 object Server {
 

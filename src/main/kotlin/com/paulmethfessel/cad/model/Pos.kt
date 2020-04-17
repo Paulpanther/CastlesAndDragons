@@ -1,4 +1,4 @@
-package model
+package com.paulmethfessel.cad.model
 
 import java.lang.IllegalArgumentException
 

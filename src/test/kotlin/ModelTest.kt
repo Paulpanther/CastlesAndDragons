@@ -1,4 +1,4 @@
-import model.*
+import com.paulmethfessel.cad.model.*
 import kotlin.test.*
 
 class ModelTest {

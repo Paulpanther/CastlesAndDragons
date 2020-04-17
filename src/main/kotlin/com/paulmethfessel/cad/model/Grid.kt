@@ -1,4 +1,4 @@
-package model
+package com.paulmethfessel.cad.model
 
 class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIterator.Element> {
 

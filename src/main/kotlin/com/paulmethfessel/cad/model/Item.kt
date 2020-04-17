@@ -1,4 +1,4 @@
-package model
+package com.paulmethfessel.cad.model
 
 enum class ItemType {
     CASTLE, DRAGON, STREET, EMPTY

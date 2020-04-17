@@ -1,6 +1,6 @@
-package server
+package com.paulmethfessel.cad.server
 
-import util.DelayTimer
+import com.paulmethfessel.cad.util.DelayTimer
 
 const val MAX_PLAYERS = 4
 const val GAME_STARTS_TIME = 10000

@@ -1,4 +1,4 @@
-package util
+package com.paulmethfessel.cad.util
 
 object Random {
     fun <T> shuffle(list: List<T>): List<T> {

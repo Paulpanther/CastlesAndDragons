@@ -1,8 +1,8 @@
-import model.Grid
-import model.Items
-import model.Orientation
-import model.Pos
-import solver.GridSolver
+import com.paulmethfessel.cad.model.Grid
+import com.paulmethfessel.cad.model.Items
+import com.paulmethfessel.cad.model.Orientation
+import com.paulmethfessel.cad.model.Pos
+import com.paulmethfessel.cad.solver.GridSolver
 import kotlin.test.*
 
 class SolverTest {

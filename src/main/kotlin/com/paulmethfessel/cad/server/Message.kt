@@ -1,7 +1,7 @@
-package server
+package com.paulmethfessel.cad.server
 
-import model.*
-import util.ListExt.reverse
+import com.paulmethfessel.cad.model.*
+import com.paulmethfessel.cad.util.ListExt.reverse
 import java.lang.Exception
 
 enum class MessageType {

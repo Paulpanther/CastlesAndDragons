@@ -1,5 +1,4 @@
-import model.*
-import java.lang.IllegalArgumentException
+import com.paulmethfessel.cad.model.*
 import kotlin.test.*
 
 
