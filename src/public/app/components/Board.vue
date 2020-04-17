@@ -1,8 +1,14 @@
 <template lang="pug">
-    .board
-        .row(v-for="y in parseInt(gameHeight)" :key="y")
-            .slot(v-for="x in parseInt(gameWidth)" :key="x" v-on:click="onSlotClick(y-1, x-1, $event)")
-                .item(:class="classForPos(y-1, x-1)")
+    .board(v-show="isStarted")
+        .row(
+            v-for="y in gameHeight"
+            :key="y")
+            .slot(
+                v-for="x in gameWidth"
+                :class="classForSlot(getRealPos(x, y))"
+                :key="x"
+                v-on:click="onSlotClick(getRealPos(x, y), $event)")
+                .item(:class="classForPos(getRealPos(x, y))")
 </template>
 
 <script lang="ts">
@@ -12,6 +18,7 @@
     import Player from "../model/Player";
     import Item from "../model/Item";
     import {classForItem} from "./util";
+    import Pos from "../model/Pos";
 
     export interface SlotClickEvent {
         x: number;
@@ -22,13 +29,15 @@
     @Component
     export default class Board extends Vue {
 
-        public gameWidth: number;
-        public gameHeight: number;
+        public gameWidth: number = 0;
+        public gameHeight: number = 0;
         public player: Player;
+        public isStarted = false;
 
         public grid: Grid;
 
         public start() {
+            this.isStarted = true;
             this.grid = new Grid(this.gameWidth, this.gameHeight);
         }
 
@@ -38,23 +47,38 @@
         }
 
         public getItem(x: number, y: number): Item {
-            return this.grid[y][x];
+            return this.grid.items[y][x];
         }
 
         public setItem(x: number, y: number, item: Item) {
-            this.grid[y][x] = item;
+            this.grid.items[y][x] = item;
             this.$forceUpdate();
         }
 
-        public classForPos(y: number, x: number): string {
-            const item = this.grid.items[y][x];
+        public classForSlot(pos: Pos): string {
+            const onHero = this.grid.heroPos != null && this.grid.heroStartPos().equals(pos);
+            if (onHero) {
+                const dir = pos.orientationTo(this.grid.heroPos);
+                return "hero-" + dir;
+            }
+            return "";
+        }
+
+        public classForPos(pos: Pos): string {
+            const item = this.grid.items[pos.y][pos.x];
             return classForItem(item);
         }
 
-        public onSlotClick(y: number, x: number, event: MouseEvent) {
+        public onSlotClick(pos: Pos, event: MouseEvent) {
+            console.log(pos);
             this.$emit("slot-click", {
-                x, y, event
+                x: pos.x, y: pos.y, event
             });
+        }
+
+        public getRealPos(x: number, y: number) {
+            // vue arrays start at 1
+            return new Pos(x - 1, y - 1);
         }
     }
 </script>
@@ -94,7 +118,32 @@
                     padding-top: 100%
 
                 .item
+                    z-index: 1
                     width: 100%
                     height: 100%
                     border: 1px solid black
+
+                &[class*=" hero"]:before
+                    z-index: 2
+                    display: block
+                    position: relative
+
+                    width: 100%
+                    height: 100%
+                    bottom: 50%
+
+                    background: url("../assets/knight.png") no-repeat center
+
+                &.hero-0:before
+                    top: -50%
+                    transform: rotate(90deg)
+                &.hero-1:before
+                    left: -50%
+                    transform: rotate(0deg)
+                &.hero-2:before
+                    bottom: 0
+                    transform: rotate(270deg)
+                &.hero-3:before
+                    right: -50%
+                    transform: rotate(180deg)
 </style>

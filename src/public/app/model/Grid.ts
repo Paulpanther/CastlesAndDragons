@@ -51,6 +51,13 @@ export default class Grid {
         }
     }
 
+    public heroStartPos(): Pos {
+        if (this.heroPos.x == -1) return new Pos(this.heroPos.x + 1, this.heroPos.y);
+        else if (this.heroPos.x == this.width) return new Pos(this.heroPos.x - 1, this.heroPos.y);
+        else if (this.heroPos.y == -1) return new Pos(this.heroPos.x, this.heroPos.y + 1);
+        else return new Pos(this.heroPos.x, this.heroPos.y - 1);
+    }
+
     public clear() {
         this.items = [];
         for (let y = 0; y < this.height; y++) {
