@@ -11,7 +11,7 @@ object Server {
     }
 
     fun closeGame(players: List<Client>) {
-
+        rooms += WaitingRoom(players.toMutableList())
     }
 
     fun startGame(players: List<Client>) {

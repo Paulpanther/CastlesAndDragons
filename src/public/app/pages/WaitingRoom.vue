@@ -19,6 +19,7 @@
     import {ConnectionListener, Message} from "../Connection";
     import Player from "../model/Player";
     import {EventBus} from "../App.vue";
+    import {TickingTimer} from "../components/util";
 
     @Component
     export default class WaitingRoom extends ConnectionListener {
@@ -27,12 +28,21 @@
         public self: Player = null;
         public name = "";
         public waitingForNameChange = false;
-        public gameStartTime: number;
+
         public isGameStarting = false;
         public countDown = 0;
-        private completedHandshake = false;
 
-        onMessage(message: Message) {
+        private completedHandshake = false;
+        private gameStartTimer = new TickingTimer();
+
+        public mounted() {
+            EventBus.$on("gameend", (event) => {
+                this.self = event.self;
+                this.connectedPlayers = event.others;
+            });
+        }
+
+        public onMessage(message: Message) {
             this.callMethodForMessage(message);
         }
 
@@ -89,16 +99,20 @@
 
         private onGameStartsIn(message: Message) {
             const delay = parseInt(message.get("delay"));
-            this.gameStartTime = Date.now() + delay;
+            this.gameStartTimer.start(delay, 1000, timer => {
+                this.countDown = timer.count;
+            });
             this.isGameStarting = true;
-            this.tick();
         }
 
         private onGameStartStopped(message: Message) {
+            this.gameStartTimer.cancel();
             this.isGameStarting = false;
         }
 
         private onGameStarts(message: Message) {
+            this.gameStartTimer.cancel();
+            this.isGameStarting = false;
             const size = message.getMultiple("size");
             EventBus.$emit("gamestart", {
                 gameWidth: size[0],
@@ -107,13 +121,6 @@
                 self: this.self,
                 others: this.connectedPlayers
             });
-        }
-
-        private tick() {
-            if (this.isGameStarting && this.gameStartTime > Date.now()) {
-                setTimeout(this.tick, 1000);
-                this.countDown = Math.floor((this.gameStartTime - Date.now()) / 1000);
-            }
         }
     }
 </script>

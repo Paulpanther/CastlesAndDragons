@@ -57,6 +57,9 @@ object Clients: WebSocketServer(InetSocketAddress(PORT)) {
     override fun onMessage(conn: WebSocket?, str: String?) {
         println("New Message: $str")
         val parsed = Message.parse(str)
+        if (parsed.type == MessageType.RESTART) {
+            restart()
+        }
         notifyListeners(conn) { l, c -> l.onMessage(c, parsed) }
     }
 

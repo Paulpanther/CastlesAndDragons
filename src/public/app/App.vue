@@ -25,6 +25,9 @@
             EventBus.$on("gamestart", () => {
                 this.inGame = true;
             });
+            EventBus.$on("gameend", () => {
+                this.inGame = false;
+            })
         }
     }
 </script>

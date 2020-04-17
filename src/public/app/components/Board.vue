@@ -132,10 +132,13 @@
                     height: 100%
                     bottom: 50%
 
+                    pointer-events: none
+                    touch-action: none
+
                     background: url("../assets/knight.png") no-repeat center
 
                 &.hero-0:before
-                    top: -50%
+                    top: -100%
                     transform: rotate(90deg)
                 &.hero-1:before
                     left: -50%

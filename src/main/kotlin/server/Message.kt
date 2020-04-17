@@ -5,7 +5,7 @@ import util.ListExt.reverse
 import java.lang.Exception
 
 enum class MessageType {
-    NAME, MOVE, FINISHED, INVALID
+    NAME, MOVE, FINISHED, INVALID, RESTART
 }
 
 open class Message(
@@ -23,6 +23,7 @@ open class Message(
                     MessageType.NAME -> parseName(args)
                     MessageType.MOVE -> parseMove(args)
                     MessageType.FINISHED -> Message(MessageType.FINISHED)
+                    MessageType.RESTART -> Message(MessageType.RESTART)
                     else -> Message(MessageType.INVALID)
                 }
             } catch (e: Exception) {  // Catch everything, so messages cannot crash the server

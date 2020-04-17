@@ -75,8 +75,30 @@
 
         private callMethodForMessage(message: Message) {
             switch (message.get("type")) {
-                case "setGrid": this.setGrid(message);
+                case "setGrid": return this.setGrid(message);
+                case "finished": return this.trueFinished(message);
+                case "notFinished": return this.falseFinished(message);
             }
+        }
+
+        private falseFinished(message: Message) {
+            const player = Player.parse(message.get("client"));
+            if (player.id === this.self.id) {
+                alert("You lost")
+            }
+        }
+
+        private trueFinished(message: Message) {
+            const player = Player.parse(message.get("client"));
+            if (player.id === this.self.id) {
+                alert("You won!");
+            } else {
+                alert(`Player "${player.name} won!`)
+            }
+            EventBus.$emit("gameend", {
+                self: this.self,
+                others: this.others
+            });
         }
 
         public setGrid(message: Message) {
