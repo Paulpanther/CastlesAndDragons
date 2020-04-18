@@ -1,0 +1,27 @@
+{
+  "name": "castlesanddragonsclient",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel index.pug",
+    "build": "parcel build index.pug"
+  },
+  "author": "Paul Methfessel",
+  "license": "MIT",
+  "devDependencies": {
+    "@vue/component-compiler-utils": "^3.1.2",
+    "parcel-bundler": "^1.12.4",
+    "pug": "^2.0.4",
+    "sass": "^1.26.3",
+    "typescript": "^3.8.3",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "dependencies": {
+    "lodash": "latest",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.3",
+    "vue-hot-reload-api": "^2.3.4",
+    "vue-property-decorator": "^8.4.1"
+  }
+}
