@@ -6,25 +6,21 @@ import com.paulmethfessel.cad.solver.GridSolver
 import com.paulmethfessel.cad.util.DelayTimer
 import com.paulmethfessel.cad.util.ListExt.without
 
-const val WIDTH = 5
-const val HEIGHT = 3
-const val GAME_DELAY = 8000
-
 class Game(private val players: List<Client>): ClientListener() {
 
     private var running = false
     private val playersInGame = players.toMutableList()
-    private val delayTimer = DelayTimer("gameDelay", GAME_DELAY, this::generateGrid)
+    private val delayTimer = DelayTimer("gameDelay", Config.showGridDelay, this::generateGrid)
 
     init {
-        players.forEach { it.grid = Grid(WIDTH, HEIGHT) }
-        sendTo(players, Response.startGame(WIDTH, HEIGHT, GAME_DELAY))
+        players.forEach { it.grid = Grid(Config.gridWidth, Config.gridHeight) }
+        sendTo(players, Response.startGame(Config.gridWidth, Config.gridHeight, Config.showGridDelay))
         delayTimer.restart()
         println("Start Game")
     }
 
     private fun generateGrid() {
-        val grid = RecursiveGenerator(WIDTH, HEIGHT).generate()
+        val grid = RecursiveGenerator(Config.gridWidth, Config.gridHeight).generate()
         players.forEach {
             it.grid = grid
             it.send(Response.setGrid(it, grid))

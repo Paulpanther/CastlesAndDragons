@@ -2,24 +2,21 @@ package com.paulmethfessel.cad.server
 
 import com.paulmethfessel.cad.util.DelayTimer
 
-const val MAX_PLAYERS = 4
-const val GAME_STARTS_TIME = 10000
-
 class WaitingRoom(private val players: MutableList<Client> = mutableListOf()) : ClientListener() {
 
-    private val timer = DelayTimer("gameStarts", GAME_STARTS_TIME,
+    private val timer = DelayTimer("gameStarts", Config.startGameDelay,
             this::startGame,
-            { sendTo(players, Response.gameStartsIn(GAME_STARTS_TIME)) },
+            { sendTo(players, Response.gameStartsIn(Config.startGameDelay)) },
             { sendTo(players, Response.gameStartStopped()) })
 
     override fun onJoined(client: Client) {
-        if (players.size + 1 <= MAX_PLAYERS) {
+        if (players.size + 1 <= Config.playerCount) {
             client.send(Response.nameAndId(client))
             players.add(client)
             sendPlayersList()
             println("Player joined: ${client.id}, ${client.name}")
 
-            if (players.size >= MAX_PLAYERS && !timer.isRunning) {
+            if (players.size >= Config.playerCount && !timer.isRunning) {
                 timer.restart()
             }
         } else {
