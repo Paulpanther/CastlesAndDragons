@@ -10,7 +10,7 @@ repositories {
 }
 
 group = "com.paulmethfessel"
-version = "1.0.0"
+version = "0.1.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
