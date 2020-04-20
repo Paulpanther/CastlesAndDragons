@@ -11,7 +11,8 @@ export default class Connection {
     private static connection: WebSocket;
 
     public static init() {
-        this.connection = new WebSocket("ws://localhost:6789");
+        const server = process.env.SERVER || "localhost:6789";
+        this.connection = new WebSocket("ws://" + server);
 
         this.connection.onmessage = (event) => {
             console.log(event.data);

@@ -17,3 +17,15 @@ The following args can be set:
 - `--player-count <int>`: The Amount of Players in each Game
 - `--grid-width <int>`: The Width of the Grid
 - `--grid-height <int>`: The Height of the Grid
+
+#### Static
+
+1. Go into `static/`
+2. Run `npm i`
+3. Run `npm run build` (Build files are in `dist/`)
+
+You can run a dev server with `npm start`
+
+Environment arguments can be set by creating a file named `.env` containing `key=value` pairs.   
+The following args can be set:
+- `SERVER`: Url of the websocket server. Example: `localhost:6789`
