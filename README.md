@@ -20,12 +20,18 @@ The following args can be set:
 
 #### Static
 
+##### Build
 1. Go into `static/`
 2. Run `npm i`
 3. Run `npm run build` (Build files are in `dist/`)
 
+##### Run
 You can run a dev server with `npm start`
 
+##### Settings
 Environment arguments can be set by creating a file named `.env` containing `key=value` pairs.   
 The following args can be set:
 - `SERVER`: Url of the websocket server. Example: `localhost:6789`
+
+##### Release
+A release `dist.tar.gz` can be created by running `npm run release`
