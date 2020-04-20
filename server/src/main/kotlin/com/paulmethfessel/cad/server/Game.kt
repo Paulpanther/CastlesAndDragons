@@ -10,17 +10,17 @@ class Game(private val players: List<Client>): ClientListener() {
 
     private var running = false
     private val playersInGame = players.toMutableList()
-    private val delayTimer = DelayTimer("gameDelay", Config.showGridDelay, this::generateGrid)
+    private val delayTimer = DelayTimer("gameDelay", Server.config.showGridDelay, this::generateGrid)
 
     init {
-        players.forEach { it.grid = Grid(Config.gridWidth, Config.gridHeight) }
-        sendTo(players, Response.startGame(Config.gridWidth, Config.gridHeight, Config.showGridDelay))
+        players.forEach { it.grid = Grid(Server.config.gridWidth, Server.config.gridHeight) }
+        sendTo(players, Response.startGame(Server.config.gridWidth, Server.config.gridHeight, Server.config.showGridDelay))
         delayTimer.restart()
         println("Start Game")
     }
 
     private fun generateGrid() {
-        val grid = RecursiveGenerator(Config.gridWidth, Config.gridHeight).generate()
+        val grid = RecursiveGenerator(Server.config.gridWidth, Server.config.gridHeight).generate()
         players.forEach {
             it.grid = grid
             it.send(Response.setGrid(it, grid))

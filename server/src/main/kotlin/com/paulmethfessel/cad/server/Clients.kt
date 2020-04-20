@@ -7,9 +7,7 @@ import org.java_websocket.server.WebSocketServer
 import java.lang.Exception
 import java.net.InetSocketAddress
 
-const val PORT = 6789
-
-object Clients: WebSocketServer(InetSocketAddress(PORT)) {
+object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
 
     val clients = mutableListOf<Client>()
     private val listeners = mutableListOf<ClientListener>()

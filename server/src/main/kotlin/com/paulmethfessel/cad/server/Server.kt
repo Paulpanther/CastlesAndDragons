@@ -2,10 +2,14 @@ package com.paulmethfessel.cad.server
 
 object Server {
 
+    private lateinit var _config: Config
+    val config: Config get() = _config
+
     private val rooms = mutableListOf<WaitingRoom>()
     private val games = mutableListOf<Game>()
 
-    fun start() {
+    fun start(config: Config) {
+        _config = config
         rooms += WaitingRoom()
         Clients.runServer()
     }

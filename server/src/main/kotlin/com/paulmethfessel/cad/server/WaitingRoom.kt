@@ -4,19 +4,19 @@ import com.paulmethfessel.cad.util.DelayTimer
 
 class WaitingRoom(private val players: MutableList<Client> = mutableListOf()) : ClientListener() {
 
-    private val timer = DelayTimer("gameStarts", Config.startGameDelay,
+    private val timer = DelayTimer("gameStarts", Server.config.startGameDelay,
             this::startGame,
-            { sendTo(players, Response.gameStartsIn(Config.startGameDelay)) },
+            { sendTo(players, Response.gameStartsIn(Server.config.startGameDelay)) },
             { sendTo(players, Response.gameStartStopped()) })
 
     override fun onJoined(client: Client) {
-        if (players.size + 1 <= Config.playerCount) {
+        if (players.size + 1 <= Server.config.playerCount) {
             client.send(Response.nameAndId(client))
             players.add(client)
             sendPlayersList()
             println("Player joined: ${client.id}, ${client.name}")
 
-            if (players.size >= Config.playerCount && !timer.isRunning) {
+            if (players.size >= Server.config.playerCount && !timer.isRunning) {
                 timer.restart()
             }
         } else {

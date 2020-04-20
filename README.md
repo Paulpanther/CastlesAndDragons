@@ -2,10 +2,18 @@
 
 Online Game to play with your friends.
 
-### Debugging
+### Install
 
-To test new assets, place them in `src/public/app/assets`.
-Run the WebSocket Server with: `./gradlew runServer --args="--debugStartWithGame"`
-Run the DevServer with `npm start --prefix src/public`
-**Warning:** Wait 2 minutes before restarting the Websocket Server 
-(There is a bug which prevents the port from getting closed)
+#### Server
+
+1. Go into `server/`
+2. Run `./gradlew shadowJar`
+3. Start the Jar with: `java -jar build/libs/<name-of-jar>.jar`
+
+The following args can be set:
+- `--port <int>`: The port to run at
+- `--start-game-delay <int>`: The Delay in the Waiting Room before a Game starts
+- `--show-grid-delay <int>`: The Delay in Game before the Task is shown
+- `--player-count <int>`: The Amount of Players in each Game
+- `--grid-width <int>`: The Width of the Grid
+- `--grid-height <int>`: The Height of the Grid
