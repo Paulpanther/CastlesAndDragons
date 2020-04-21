@@ -27,4 +27,8 @@ object Random {
     }
 
     fun bool() = Math.random() < 0.5
+
+    fun between(range: IntRange): Int {
+        return from(range.toList())
+    }
 }

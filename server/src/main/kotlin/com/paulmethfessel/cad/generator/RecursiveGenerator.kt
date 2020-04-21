@@ -9,14 +9,15 @@ class RecursiveGenerator(
         private val grid: Grid = Grid(width, height)
 ) {
 
+    private var amountOfCastlesNeededMin = 0
     private val openConnections = mutableListOf<Connection>()
     private var placedDragonRed = false
     private var placedDragonBlue = false
-    private var placedCastlesRedCount = 0
-    private var placedCastlesBlueCount = 0
+    private var placedCastlesCount = 0
     private val usedItems = mutableListOf<Item>()
 
     fun generate(): Grid {
+        chooseCastles()
         val hero = chooseHeroPos()
         grid.heroPos = hero
         openConnections.add(Connection(hero, grid.heroStartPos()))
@@ -103,8 +104,7 @@ class RecursiveGenerator(
         grid.setItem(pos, item, up)
         if (item == Items.DRAGON_STONE) placedDragonBlue = true
         if (item == Items.DRAGON_MUD) placedDragonRed = true
-        if (item == Items.CASTLE_STONE_2 || item == Items.CASTLE_STONE_1) placedCastlesBlueCount++
-        if (item == Items.CASTLE_MUD_1 || item == Items.CASTLE_MUD_2) placedCastlesRedCount++
+        if (item.type == ItemType.CASTLE) placedCastlesCount++
 
         openConnections.removeIf { it.to == pos }
         openConnections.addAll(getOpenConnectionsFrom(pos))
@@ -116,8 +116,7 @@ class RecursiveGenerator(
         val item = state.item
         if (item == Items.DRAGON_STONE) placedDragonBlue = false
         if (item == Items.DRAGON_MUD) placedDragonRed = false
-        if (item == Items.CASTLE_STONE_2 || item == Items.CASTLE_STONE_1) placedCastlesBlueCount--
-        if (item == Items.CASTLE_MUD_1 || item == Items.CASTLE_MUD_2) placedCastlesRedCount--
+        if (item.type == ItemType.CASTLE) placedCastlesCount--
 
         openConnections.removeAll(getOpenConnectionsFrom(pos))
         openConnections.addAll(getOpenConnectionsTo(pos))
@@ -169,7 +168,7 @@ class RecursiveGenerator(
     }
 
     private fun areCastlesAndDragonsInGrid(): Boolean {
-        return placedDragonBlue && placedDragonRed && placedCastlesBlueCount >= 1 && placedCastlesRedCount >= 1
+        return placedDragonBlue && placedDragonRed && placedCastlesCount >= amountOfCastlesNeededMin
     }
 
     private fun chooseHeroPos(): Pos {
@@ -182,6 +181,10 @@ class RecursiveGenerator(
             }
         }
         return Random.from(positions)
+    }
+
+    private fun chooseCastles() {
+        amountOfCastlesNeededMin = Random.between(2 .. 4)
     }
 }
 
