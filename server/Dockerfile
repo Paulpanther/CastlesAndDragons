@@ -10,7 +10,7 @@ EXPOSE ${PORT}
 
 FROM openjdk:${VERSION}-jre
 
-COPY --from=BUILD /src/build/libs/*.jar /bin/runner/run.jar
+COPY --from=BUILD /src/build/libs/server.jar /bin/runner/run.jar
 WORKDIR /bin/runner
 
 CMD ["java","-jar","run.jar", "--port", "${PORT}"]
