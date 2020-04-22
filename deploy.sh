@@ -1,13 +1,13 @@
 
 git pull
-cd static
-docker stop castelsanddragonbuild
-docker rm castelsanddragonbuild
-docker build -t castelsanddragonbuild .
-docker run castelsanddragonbuild-t castelsanddragonbuild -d -p 80:80
+cd static || exit
+docker stop castlesanddragons-static
+docker rm castlesanddragons-static
+docker build -t castlesanddragons-static .
+docker run --name castlesanddragons-static -d -p 80:80 castlesanddragons-static
 
-cd ../server
-docker stop castelsanddragonsserver
-docker rm castelsanddragonsserver
-docker build -t castelsanddragonsserver .
-docker run castelsanddragonsserver -t castelsanddragonbuild -d -p 5678:5678
+cd ../server || exit
+docker stop castlesanddragons-server
+docker rm castlesanddragons-server
+docker build -t castlesanddragons-server .
+docker run --name castlesanddragons-server -d -p 5678:5678 castlesanddragons-server
