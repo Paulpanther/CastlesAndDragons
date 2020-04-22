@@ -13,4 +13,4 @@ EXPOSE ${PORT}
 COPY --from=BUILD /server/build/libs/server.jar /bin/runner/run.jar
 WORKDIR /bin/runner
 
-CMD ["java","-jar","run.jar", "--port", "${PORT}"]
+CMD java -jar run.jar --port ${PORT}
