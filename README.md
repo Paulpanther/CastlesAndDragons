@@ -2,7 +2,14 @@
 
 Online Game to play with your friends.
 
-### Install
+### Install for Production
+
+Run `./deploy.sh`.
+It will start two Docker images:
+- `castlesanddragons-server`: running on port 5678
+- `castlesanddragons-static`: running on port 80 (nginx server)
+
+### Install for Development
 
 #### Server
 

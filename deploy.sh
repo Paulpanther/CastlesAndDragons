@@ -1,4 +1,4 @@
-
+#!/usr/bin/env bash
 git pull
 cd static || exit
 docker stop castlesanddragons-static
