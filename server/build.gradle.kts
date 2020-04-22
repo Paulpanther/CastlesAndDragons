@@ -33,6 +33,7 @@ dependencies {
 }
 
 tasks.withType<ShadowJar>() {
+    archiveFileName.set("${archiveBaseName.get()}.${archiveExtension.get()}")
     manifest {
         attributes["Main-Class"] = "com.paulmethfessel.cad.CastlesAndDragonsKt"
     }

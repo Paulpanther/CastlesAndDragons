@@ -1,15 +1,16 @@
 ARG VERSION=8u151
+ARG PORT=5678
 
 FROM openjdk:${VERSION}-jdk as BUILD
 
 COPY . /src
 WORKDIR /src
-RUN ./gradlew --no-daemon jar
-EXPOSE 5678:5678
+RUN ./gradlew --no-daemon shadowJar
+EXPOSE ${PORT}
 
 FROM openjdk:${VERSION}-jre
 
-COPY --from=BUILD /src/build/libs/step-by-step-kotlin-all.jar /bin/runner/run.jar
+COPY --from=BUILD /src/build/libs/server.jar /bin/runner/run.jar
 WORKDIR /bin/runner
 
-CMD ["java","-jar","run.jar"]
+CMD ["java","-jar","run.jar", "--port", "${PORT}"]
