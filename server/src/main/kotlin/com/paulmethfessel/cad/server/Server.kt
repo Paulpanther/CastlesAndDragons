@@ -14,17 +14,33 @@ object Server {
         Clients.runServer()
     }
 
-    fun closeGame(players: List<Client>) {
-        rooms += WaitingRoom(players.toMutableList())
+    fun closeRoom(room: Room) {
+        room.stopListening()
+        if (room is WaitingRoom) {
+            rooms -= room
+        } else if (room is Game) {
+            games -= room
+        }
     }
 
-    fun startGame(players: List<Client>) {
-        games += Game(players)
+    fun openRoom(room: Room) {
+        if (room is WaitingRoom) {
+            rooms += room
+        } else if (room is Game) {
+            games += games
+        }
+    }
+
+    fun <T: Room> switchRoom(old: Room, next: (players: MutableList<Client>) -> T): T {
+        val nextInstance = next(old.players)
+        closeRoom(old)
+        openRoom(nextInstance)
+        return nextInstance
     }
 
     fun reset() {
-        rooms.forEach { it.stopListening() }
-        games.forEach { it.stopListening() }
-        rooms += WaitingRoom()
+        rooms.forEach { closeRoom(it) }
+        games.forEach { closeRoom(it) }
+        openRoom(WaitingRoom())
     }
 }

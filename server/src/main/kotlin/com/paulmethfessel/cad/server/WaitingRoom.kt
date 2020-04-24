@@ -2,12 +2,12 @@ package com.paulmethfessel.cad.server
 
 import com.paulmethfessel.cad.util.DelayTimer
 
-class WaitingRoom(private val players: MutableList<Client> = mutableListOf()) : ClientListener() {
+class WaitingRoom(players: MutableList<Client> = mutableListOf()) : Room(players) {
 
     private val timer = DelayTimer("gameStarts", Server.config.startGameDelay,
-            this::startGame,
-            { sendTo(players, Response.gameStartsIn(Server.config.startGameDelay)) },
-            { sendTo(players, Response.gameStartStopped()) })
+            { switchTo(::Game) },
+            { sendToPlayers(Response.gameStartsIn(Server.config.startGameDelay)) },
+            { sendToPlayers(Response.gameStartStopped()) })
 
     override fun onJoined(client: Client) {
         if (players.size + 1 <= Server.config.playerCount) {
@@ -24,11 +24,9 @@ class WaitingRoom(private val players: MutableList<Client> = mutableListOf()) : 
         }
     }
 
-    override fun onMessage(client: Client, message: Message) {
-        if (client in players) {
-            if (message.type == MessageType.NAME) {
-                onNameMessage(client, message as NameMessage)
-            }
+    override fun onPlayerMessage(client: Client, message: Message) {
+        if (message.type == MessageType.NAME) {
+            onNameMessage(client, message as NameMessage)
         }
     }
 
@@ -42,21 +40,13 @@ class WaitingRoom(private val players: MutableList<Client> = mutableListOf()) : 
         }
     }
 
-    override fun onLeave(client: Client) {
-        println("left: ${client.name}")
-        if (client in players) {
-            players.remove(client)
-            timer.stop()
-            sendPlayersList()
-        }
-    }
-
-    private fun startGame() {
-        stopListening()
-        Server.startGame(players)
+    override fun onPlayerLeave(client: Client) {
+        players.remove(client)
+        timer.stop()
+        sendPlayersList()
     }
 
     private fun sendPlayersList() {
-        sendTo(players, Response.setPlayers(players.map { it.id.toString() }, players.map(Client::name)))
+        sendToPlayers(Response.setPlayers(players.map { it.id.toString() }, players.map(Client::name)))
     }
 }

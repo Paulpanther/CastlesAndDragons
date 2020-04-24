@@ -6,7 +6,7 @@ import com.paulmethfessel.cad.solver.GridSolver
 import com.paulmethfessel.cad.util.DelayTimer
 import com.paulmethfessel.cad.util.ListExt.without
 
-class Game(private val players: List<Client>): ClientListener() {
+class Game(players: MutableList<Client>): Room(players) {
 
     private var running = false
     private val playersInGame = players.toMutableList()
@@ -56,27 +56,23 @@ class Game(private val players: List<Client>): ClientListener() {
                 } else {
                     sendTo(players, Response.finished(client))
                 }
-                Server.closeGame(players)
+                switchTo(::Game)
             }
         }
     }
 
-    override fun onMessage(client: Client, message: Message) {
-        if (client in players) {
-            if (message.type == MessageType.MOVE) {
-                onMove(client, message as MoveMessage)
-            } else if (message.type == MessageType.FINISHED) {
-                onFinished(client)
-            }
+    override fun onPlayerMessage(client: Client, message: Message) {
+        if (message.type == MessageType.MOVE) {
+            onMove(client, message as MoveMessage)
+        } else if (message.type == MessageType.FINISHED) {
+            onFinished(client)
         }
     }
 
-    override fun onLeave(client: Client) {
-        if (client in players) {
-            sendTo(players.without(client), Response.left(client))
-            delayTimer.stop()
-            stopListening()
-            Server.closeGame(players)
-        }
+    override fun onPlayerLeave(client: Client) {
+        sendTo(players.without(client), Response.left(client))
+        delayTimer.stop()
+        stopListening()
+        close()
     }
 }

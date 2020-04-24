@@ -78,6 +78,7 @@
                 case "setGrid": return this.setGrid(message);
                 case "finished": return this.trueFinished(message);
                 case "notFinished": return this.falseFinished(message);
+                case "gameStart": return this.nextGame(message);
             }
         }
 
@@ -95,7 +96,13 @@
             } else {
                 alert(`Player "${player.name} won!`)
             }
-            EventBus.$emit("gameend", {
+        }
+
+        public nextGame(message: Message) {
+            EventBus.$emit("gamestart", {
+                gameWidth: this.$refs.board.grid.width,
+                gameHeight: this.$refs.board.grid.height,
+                gameDelay: message.get("delay"),
                 self: this.self,
                 others: this.others
             });

@@ -100,7 +100,7 @@
         position: relative
         z-index: 0
         width: 100%
-        background: #00ff00
+        background: #8BC34A
 
         .row
             display: flex
