@@ -1,11 +1,3 @@
-import Item from "../model/Item";
-import Connection from "../Connection";
-
-export function classForItem(item: Item): string {
-    const rotClass = `rot-${item.up}`;
-    const typeClass = `item-${item.type}`;
-    return `${rotClass} ${typeClass}`;
-}
 
 export class TickingTimer {
 
@@ -48,4 +40,17 @@ export class TickingTimer {
             this.tickFunction(this);
         }
     }
+}
+
+/**
+ * Better mod.
+ * For positive `m` the result will never be negative.
+ *
+ * **Example**:
+ * ```
+ * -1 % 3 === 2
+ * ```
+ */
+export function mod(x: number, m: number) {
+    return (x % m + m) % m;
 }

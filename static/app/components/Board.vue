@@ -8,7 +8,7 @@
                 :class="classForSlot(getRealPos(x, y))"
                 :key="x"
                 v-on:click="onSlotClick(getRealPos(x, y), $event)")
-                .item(:class="classForPos(getRealPos(x, y))")
+                ItemComponent(:item="itemAt(getRealPos(x, y))")
 </template>
 
 <script lang="ts">
@@ -17,8 +17,8 @@
     import Grid from "../model/Grid";
     import Player from "../model/Player";
     import Item from "../model/Item";
-    import {classForItem} from "./util";
     import Pos from "../model/Pos";
+    import ItemComponent from "./ItemComponent.vue";
 
     export interface SlotClickEvent {
         x: number;
@@ -26,7 +26,7 @@
         event: MouseEvent;
     }
 
-    @Component
+    @Component({ components: {ItemComponent} })
     export default class Board extends Vue {
 
         public gameWidth: number = 0;
@@ -64,9 +64,8 @@
             return "";
         }
 
-        public classForPos(pos: Pos): string {
-            const item = this.grid.items[pos.y][pos.x];
-            return classForItem(item);
+        public itemAt(pos: Pos): Item {
+            return this.grid.items[pos.y][pos.x];
         }
 
         public onSlotClick(pos: Pos, event: MouseEvent) {
@@ -83,70 +82,59 @@
     }
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 
-@use "./_items.sass"
-
-#game
+.board
+    position: relative
+    z-index: 0
     width: 100%
-    height: 100vh
+    background: #8BC34A
 
-    .item
-        width: 100px
-        height: 100px
-        background-size: cover
+    .row
+        display: flex
+        justify-content: space-around
+        line-height: 30px
 
-    .board
-        position: relative
-        z-index: 0
-        width: 100%
-        background: #8BC34A
+        .slot
+            margin: 5px
+            flex: 1 0 auto
+            height: auto
 
-        .row
-            display: flex
-            justify-content: space-around
-            line-height: 30px
+            &:before
+                content: ""
+                float: left
+                padding-top: 100%
 
-            .slot
-                margin: 5px
-                flex: 1 0 auto
-                height: auto
+            .item
+                z-index: 1
+                width: 100%
+                height: 100%
+                border: 1px solid black
 
-                &:before
-                    content: ""
-                    float: left
-                    padding-top: 100%
+            &[class*=" hero"]:before
+                z-index: 2
+                display: block
+                position: relative
 
-                .item
-                    z-index: 1
-                    width: 100%
-                    height: 100%
-                    border: 1px solid black
+                width: 100%
+                height: 100%
+                bottom: 50%
 
-                &[class*=" hero"]:before
-                    z-index: 2
-                    display: block
-                    position: relative
+                pointer-events: none
+                touch-action: none
 
-                    width: 100%
-                    height: 100%
-                    bottom: 50%
+                background: url("../assets/knight.png") no-repeat center
 
-                    pointer-events: none
-                    touch-action: none
-
-                    background: url("../assets/knight.png") no-repeat center
-
-                &.hero-0:before
-                    top: -100%
-                    transform: rotate(90deg)
-                &.hero-1:before
-                    left: -50%
-                    transform: rotate(0deg)
-                &.hero-2:before
-                    bottom: 0
-                    transform: rotate(270deg)
-                &.hero-3:before
-                    right: -50%
-                    transform: rotate(180deg)
+            &.hero-0:before
+                top: -100%
+                transform: rotate(90deg)
+            &.hero-1:before
+                left: -50%
+                transform: rotate(0deg)
+            &.hero-2:before
+                bottom: 0
+                transform: rotate(270deg)
+            &.hero-3:before
+                right: -50%
+                transform: rotate(180deg)
 </style>

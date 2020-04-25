@@ -3,24 +3,34 @@
         h4(v-if="isGameStarting") Game starts in: {{ gameStartsCountdown }}
         Board(ref="board", v-on:slot-click="onSlotClick($event)")
         button#finish(v-on:click="finish") Finish
+
         .drawer(v-on:click="onDrawerClick()")
-            .item(v-for="item in drawerItems" :key="item.type" :class="classForItem(item)" v-on:click="onItemClick(item, $event)")
+            ItemComponent(
+                v-for="item in drawerItems"
+                :key="item.type"
+                :item="item"
+                @click="onItemClick(item, $event)")
+
         .free-items
-            .item(v-if="freeItem !== null" :class="classForItem(freeItem)" v-bind:style="{ top: freeItemPos.y + 'px', left: freeItemPos.x + 'px' }")
+            ItemComponent(
+                v-if="freeItem !== null"
+                :item="freeItem"
+                rotatable="true"
+                v-bind:style="{ top: freeItemPos.y + 'px', left: freeItemPos.x + 'px' }")
 </template>
 
 <script lang="ts">
-    import {ConnectionListener, Message} from "../Connection";
     import Component from "vue-class-component";
     import * as _ from "lodash";
+    import {ConnectionListener, Message} from "../Connection";
     import Player from "../model/Player";
     import {EventBus} from "../App.vue";
     import Item from "../model/Item";
     import Pos from "../model/Pos";
     import Board, {SlotClickEvent} from "../components/Board.vue";
-    import {classForItem} from "../components/util";
+    import ItemComponent from "../components/ItemComponent.vue";
 
-    @Component({ components: {Board} })
+    @Component({ components: {Board, ItemComponent} })
     export default class Game extends ConnectionListener {
 
         public drawerItems: Item[] = Item.startItems();
@@ -59,12 +69,6 @@
             document.addEventListener("mousemove", (event: MouseEvent) => {
                 if (this.freeItem !== null) {
                     this.freeItemPos = new Pos(event.x, event.y);
-                }
-            });
-            document.addEventListener("keydown", (event: KeyboardEvent) => {
-                if (this.freeItem !== null && event.key === "r") {
-                    this.freeItem.up = (this.freeItem.up + 1) % 4;
-                    this.$forceUpdate();
                 }
             });
         }
@@ -116,6 +120,7 @@
         }
 
         public onItemClick(item: Item, event) {
+            console.log("Click");
             if (this.freeItem === null) {
                 const inDrawer = this.drawerItems.findIndex(i => i.type === item.type);
                 if (inDrawer !== -1) {
@@ -170,8 +175,6 @@
             this.finished = true;
         }
 
-        public classForItem = classForItem;
-
         private gameStartTick() {
             if (this.isGameStarting && this.gameStartTime > Date.now()) {
                 setTimeout(this.gameStartTick, 1000);
@@ -183,9 +186,7 @@
     }
 </script>
 
-<style lang="sass">
-
-@use "../components/_items.sass"
+<style lang="sass" scoped>
 
 #game
     width: 100%
