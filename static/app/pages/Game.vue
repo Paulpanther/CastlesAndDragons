@@ -1,7 +1,12 @@
 <template lang="pug">
     #game
         h4(v-if="isGameStarting") Game starts in: {{ gameStartsCountdown }}
-        Board(ref="board", v-on:slot-click="onSlotClick($event)")
+
+        Board(
+            ref="board"
+            :clickable="gameStarted && !finished"
+            v-on:slot-click="onSlotClick($event)")
+
         button#finish(v-on:click="finish") Finish
 
         .drawer(v-on:click="onDrawerClick()")
@@ -42,6 +47,7 @@
         public gameStartTime: number;
         public isGameStarting = false;
         public gameStartsCountdown = 0;
+        public gameStarted = false;
 
         public finished = false;
 
@@ -113,6 +119,7 @@
         }
 
         public setGrid(message: Message) {
+            this.gameStarted = true;
             const forPlayer = Player.parse(message.get("client"));
             if (forPlayer.id === this.self.id) {
                 this.$refs.board.updateGrid(message.get("grid"));
@@ -120,7 +127,6 @@
         }
 
         public onItemClick(item: Item, event) {
-            console.log("Click");
             if (this.freeItem === null) {
                 const inDrawer = this.drawerItems.findIndex(i => i.type === item.type);
                 if (inDrawer !== -1) {

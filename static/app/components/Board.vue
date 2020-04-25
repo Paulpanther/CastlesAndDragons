@@ -19,6 +19,7 @@
     import Item from "../model/Item";
     import Pos from "../model/Pos";
     import ItemComponent from "./ItemComponent.vue";
+    import {Prop} from "vue-property-decorator";
 
     export interface SlotClickEvent {
         x: number;
@@ -35,6 +36,9 @@
         public isStarted = false;
 
         public grid: Grid;
+
+        @Prop({default: false})
+        public clickable: boolean;
 
         public start() {
             this.isStarted = true;
@@ -69,10 +73,11 @@
         }
 
         public onSlotClick(pos: Pos, event: MouseEvent) {
-            console.log(pos);
-            this.$emit("slot-click", {
-                x: pos.x, y: pos.y, event
-            });
+            if (this.clickable) {
+                this.$emit("slot-click", {
+                    x: pos.x, y: pos.y, event
+                });
+            }
         }
 
         public getRealPos(x: number, y: number) {
