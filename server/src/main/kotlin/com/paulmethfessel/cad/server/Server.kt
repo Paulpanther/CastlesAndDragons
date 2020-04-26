@@ -1,9 +1,13 @@
 package com.paulmethfessel.cad.server
 
+import org.slf4j.LoggerFactory
+
 object Server {
 
-    private lateinit var _config: Config
+    val log = LoggerFactory.getLogger(Server::class.java)
+
     val config: Config get() = _config
+    private lateinit var _config: Config
 
     private val rooms = mutableListOf<WaitingRoom>()
     private val games = mutableListOf<Game>()

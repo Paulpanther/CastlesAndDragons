@@ -1,13 +1,15 @@
 package com.paulmethfessel.cad.server
 
 import com.paulmethfessel.cad.model.Grid
-import com.paulmethfessel.cad.util.Logger
 import org.java_websocket.WebSocket
 import org.java_websocket.handshake.ClientHandshake
 import org.java_websocket.server.WebSocketServer
+import org.slf4j.MarkerFactory
 import java.lang.Exception
 import java.net.InetSocketAddress
 import kotlin.system.exitProcess
+
+private val tag = MarkerFactory.getMarker("CONNECTIONS")
 
 object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
 
@@ -17,7 +19,7 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     fun runServer() {
         isReuseAddr = true
         start()
-        println("Websocket server running on port ${this.port}")
+        Server.log.info(tag, "Websocket server running on port ${this.port}")
 
         run@ do {
             when (readLine()) {
@@ -26,7 +28,6 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
                 "restart" -> restart()
             }
         } while (true)
-        Logger.debug("From cmd")
         shutdown()
     }
 
@@ -38,7 +39,7 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     private fun shutdown() {
         clients.clear()
         stop(500)
-        println("Shutdown started")
+        Server.log.info(tag, "Shutting down")
         exitProcess(0)
     }
 
@@ -57,7 +58,7 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     }
 
     override fun onMessage(conn: WebSocket?, str: String?) {
-        Logger.debug("New Message: $str")
+        Server.log.debug(tag, "in: $str")
         val parsed = Message.parse(str)
         if (parsed.type == MessageType.RESTART) {
             restart()
@@ -73,7 +74,7 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
 
     override fun onError(conn: WebSocket?, ex: Exception?) {
         notifyListeners(conn) { l, c -> l.onLeave(c) }
-        println("Error: ${ex.toString()}")
+        Server.log.error(tag, "in onError", ex)
     }
 
     fun addListener(listener: ClientListener) {
@@ -103,11 +104,11 @@ class Client(
     lateinit var grid: Grid
 
     fun send(text: String) {
-        Logger.debug("Sending: $text")
         if (socket.isOpen) {
+            Server.log.info(tag, "out: $text")
             socket.send(text)
         } else {
-            Logger.error("ERROR: Connection not open. Did not send: $text")
+            Server.log.error("Connection not open. Did not send: $text")
         }
     }
 

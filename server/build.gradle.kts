@@ -27,7 +27,7 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 
     implementation("org.java-websocket:Java-WebSocket:1.4.1")
-    implementation("org.slf4j:slf4j-simple:1.7.25")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("com.xenomachina:kotlin-argparser:2.0.7")
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.0.2")
 }

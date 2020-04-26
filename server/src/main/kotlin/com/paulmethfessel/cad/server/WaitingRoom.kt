@@ -14,7 +14,6 @@ class WaitingRoom(players: MutableList<Client> = mutableListOf()) : Room(players
             client.send(Response.nameAndId(client))
             players.add(client)
             sendPlayersList()
-            println("Player joined: ${client.id}, ${client.name}")
 
             if (players.size >= Server.config.playerCount && !timer.isRunning) {
                 timer.restart()

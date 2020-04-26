@@ -2,9 +2,10 @@ package com.paulmethfessel.cad.model
 
 class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIterator.Element> {
 
-    var startItems = listOf<Item>()
     private val itemStates = Array(width * height) { ItemState(Items.EMPTY, this) }
     var heroPos = Pos(0, -1)
+
+    fun canBeSet(item: Item) = item == Items.EMPTY || all { it.itemState.item != item }
 
     operator fun get(x: Int, y: Int): ItemState {
         check(x, y)
@@ -15,7 +16,7 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
 
     operator fun set(x: Int, y: Int, itemState: ItemState) {
         check(x, y)
-        if (itemState.item != Items.EMPTY && any { it.itemState.item == itemState.item }) {
+        if (!canBeSet(itemState.item)) {
             throw IllegalArgumentException("Item is already present in grid")
         }
 

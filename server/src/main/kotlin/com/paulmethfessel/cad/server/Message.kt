@@ -2,7 +2,10 @@ package com.paulmethfessel.cad.server
 
 import com.paulmethfessel.cad.model.*
 import com.paulmethfessel.cad.util.ListExt.reverse
+import org.slf4j.MarkerFactory
 import java.lang.Exception
+
+private val tag = MarkerFactory.getMarker("MESSAGE_PARSER")
 
 enum class MessageType {
     NAME, MOVE, FINISHED, INVALID, RESTART
@@ -27,7 +30,7 @@ open class Message(
                     else -> Message(MessageType.INVALID)
                 }
             } catch (e: Exception) {  // Catch everything, so messages cannot crash the server
-                println("Exception while parsing message")
+                Server.log.error(tag, "Exception while parsing message", e)
                 Message(MessageType.INVALID)
             }
         }
@@ -46,7 +49,6 @@ open class Message(
             val to = parsePos(findValue(args, "to"))
             val up = parseOrientation(findValue(args, "up"))
             val item = parseItem(findValue(args, "item"))
-            println("MOVE: $from $to $up $item")
 
             if ((from != null || to != null && up != null) && item != null) {
                 return MoveMessage(from, to, up, item)

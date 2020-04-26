@@ -1,6 +1,5 @@
 package com.paulmethfessel.cad.util
 
-import com.paulmethfessel.cad.server.Server
 import java.util.*
 import kotlin.concurrent.schedule
 
@@ -24,7 +23,6 @@ class DelayTimer(
         onStart()
         timer = Timer(name, true)
         timer?.schedule(delay.toLong()) {
-            Logger.debug("Timer has run")
             onDelay()
         }
     }
