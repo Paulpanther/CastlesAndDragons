@@ -1,6 +1,8 @@
 package com.paulmethfessel.cad.server
 
 import com.paulmethfessel.cad.util.DelayTimer
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class WaitingRoom(players: MutableList<Client> = mutableListOf()) : Room(players) {
 
@@ -9,17 +11,21 @@ class WaitingRoom(players: MutableList<Client> = mutableListOf()) : Room(players
             { sendToPlayers(Response.gameStartsIn(Server.config.startGameDelay)) },
             { sendToPlayers(Response.gameStartStopped()) })
 
-    override fun onJoined(client: Client) {
-        if (players.size + 1 <= Server.config.playerCount) {
-            client.send(Response.nameAndId(client))
-            players.add(client)
-            sendPlayersList()
+    private val joinLock = ReentrantLock()
 
-            if (players.size >= Server.config.playerCount && !timer.isRunning) {
-                timer.restart()
+    override fun onJoined(client: Client) {
+        joinLock.withLock {
+            if (players.size + 1 <= Server.config.playerCount) {
+                client.send(Response.nameAndId(client))
+                players.add(client)
+                sendPlayersList()
+
+                if (players.size >= Server.config.playerCount && !timer.isRunning) {
+                    timer.restart()
+                }
+            } else {
+                client.send(Response.ERROR_ROOM_FULL)
             }
-        } else {
-            client.send(Response.ERROR_ROOM_FULL)
         }
     }
 

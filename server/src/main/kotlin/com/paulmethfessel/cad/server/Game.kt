@@ -6,6 +6,8 @@ import com.paulmethfessel.cad.solver.GridSolver
 import com.paulmethfessel.cad.util.DelayTimer
 import com.paulmethfessel.cad.util.ListExt.without
 import org.slf4j.MarkerFactory
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 private val tag = MarkerFactory.getMarker("GAME")
 
@@ -17,6 +19,9 @@ class Game(players: MutableList<Client>): Room(players) {
     private val delayTimer = DelayTimer("gameDelay", Server.config.showGridDelay, this::showGrid)
 
     private lateinit var chosenGrid: Grid
+
+    private val moveLock = ReentrantLock()
+    private val finishLock = ReentrantLock()
 
     init {
         val grid = GridPool.getNewGrid()
@@ -50,49 +55,54 @@ class Game(players: MutableList<Client>): Room(players) {
     }
 
     private fun onMove(client: Client, move: MoveMessage) {
-        if (running && client in playersInGame) {
+        moveLock.withLock {
+            if (running && client in playersInGame) {
 
-            // Remove item from position
-            if (move.from != null) {
-                client.grid.setEmpty(move.from.x, move.from.y)
-            }
-
-            // Put item to some position in some orientation
-            if (move.to != null && move.up != null) {
-                if (client.grid.canBeSet(move.item)) {
-                    client.grid.setItem(move.to, move.item, move.up)
-                } else {
-                    Server.log.error(tag, "Client ${client.id} cannot put item ${move.item} into grid")
+                // Remove item from position
+                if (move.from != null) {
+                    client.grid.setEmpty(move.from.x, move.from.y)
                 }
-            }
 
-            // Send new grid to all players
-            sendTo(players, Response.setGrid(client, client.grid))
+                // Put item to some position in some orientation
+                if (move.to != null && move.up != null) {
+                    if (client.grid.canBeSet(move.item)) {
+                        client.grid.setItem(move.to, move.item, move.up)
+                    } else {
+                        Server.log.error(tag, "Client ${client.id} cannot put item ${move.item} into grid")
+                    }
+                }
+
+                // Send new grid to all players
+                sendTo(players, Response.setGrid(client, client.grid))
+            }
         }
     }
 
     private fun onFinished(client: Client) {
-        if (running && client in playersInGame) {
-            val isFinished = GridSolver.isFinished(client.grid, client.level)
+        finishLock.withLock {
+            if (running && client in playersInGame) {
+                val isFinished = GridSolver.isFinished(client.grid, client.level)
 
-            if (!isFinished) {
-                // Player has wrong solution
-                playersInGame.remove(client)
-                sendTo(players, Response.notFinished(client))
-            } else {
-                // Player has right solution
-
-                client.level++
-                if (client.level >= 3) {
-                    // Player has won
-                    sendTo(players, Response.won(client))
-                    players.forEach { it.reset() }
+                if (!isFinished) {
+                    // Player has wrong solution
+                    playersInGame.remove(client)
+                    sendTo(players, Response.notFinished(client))
                 } else {
-                    sendTo(players, Response.finished(client))
-                }
+                    // Player has right solution
 
-                // Start new Game
-                switchTo(::Game)
+                    client.level++
+                    if (client.level >= 3) {
+                        // Player has won
+                        sendTo(players, Response.won(client))
+                        players.forEach { it.reset() }
+                    } else {
+                        sendTo(players, Response.finished(client))
+                    }
+
+                    // Start new Game
+                    running = false
+                    switchTo(::Game)
+                }
             }
         }
     }
