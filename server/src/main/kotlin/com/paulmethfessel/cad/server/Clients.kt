@@ -21,14 +21,22 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
         start()
         Server.log.info(tag, "Websocket server running on port ${this.port}")
 
-        run@ do {
-            when (readLine()) {
-                "exit" -> break@run
-                "clear" -> clients.clear()
-                "restart" -> restart()
-            }
-        } while (true)
-        shutdown()
+        Runtime.getRuntime().addShutdownHook(Thread {
+            Server.close()
+        })
+
+        try {
+            run@ do {
+                when (readLine()) {
+                    "exit" -> break@run
+                    "clear" -> clients.clear()
+                    "restart" -> restart()
+                }
+            } while (true)
+        } catch (e: InterruptedException) {}
+        finally {
+            shutdown()
+        }
     }
 
     private fun restart() {
@@ -37,9 +45,10 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     }
 
     private fun shutdown() {
+        Server.log.info(tag, "Shutting down")
+
         clients.clear()
         stop(500)
-        Server.log.info(tag, "Shutting down")
         exitProcess(0)
     }
 

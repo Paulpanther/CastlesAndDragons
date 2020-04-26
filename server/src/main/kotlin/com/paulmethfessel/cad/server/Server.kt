@@ -1,6 +1,10 @@
 package com.paulmethfessel.cad.server
 
+import com.paulmethfessel.cad.generator.GridPool
 import org.slf4j.LoggerFactory
+import org.slf4j.MarkerFactory
+
+private val tag = MarkerFactory.getMarker("Server")
 
 object Server {
 
@@ -15,6 +19,9 @@ object Server {
     fun start(config: Config) {
         _config = config
         rooms += WaitingRoom()
+
+        GridPool.run()
+
         Clients.runServer()
     }
 
@@ -46,5 +53,10 @@ object Server {
         rooms.forEach { closeRoom(it) }
         games.forEach { closeRoom(it) }
         openRoom(WaitingRoom())
+    }
+
+    fun close() {
+        log.info(tag, "Closing Server")
+        GridPool.close()
     }
 }

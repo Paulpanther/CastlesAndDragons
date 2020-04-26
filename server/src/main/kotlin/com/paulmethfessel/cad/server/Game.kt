@@ -1,6 +1,6 @@
 package com.paulmethfessel.cad.server
 
-import com.paulmethfessel.cad.generator.RecursiveGenerator
+import com.paulmethfessel.cad.generator.GridPool
 import com.paulmethfessel.cad.model.Grid
 import com.paulmethfessel.cad.solver.GridSolver
 import com.paulmethfessel.cad.util.DelayTimer
@@ -12,23 +12,41 @@ private val tag = MarkerFactory.getMarker("GAME")
 class Game(players: MutableList<Client>): Room(players) {
 
     private var running = false
+    private var showGridDelayFinished = false
     private val playersInGame = players.toMutableList()
-    private val delayTimer = DelayTimer("gameDelay", Server.config.showGridDelay, this::generateGrid)
+    private val delayTimer = DelayTimer("gameDelay", Server.config.showGridDelay, this::showGrid)
+
+    private lateinit var chosenGrid: Grid
 
     init {
+        val grid = GridPool.getNewGrid()
+        if (grid != null) {
+            chosenGrid = grid
+        } else {
+            GridPool.notifyOnNewGrid {
+                chosenGrid = it
+                if (showGridDelayFinished) {
+                    // Delay has already passed, so call show Grid again
+                    showGrid()
+                }
+            }
+        }
+
         players.forEach { it.grid = Grid(Server.config.gridWidth, Server.config.gridHeight) }
         sendTo(players, Response.startGame(Server.config.gridWidth, Server.config.gridHeight, Server.config.showGridDelay))
 
         delayTimer.restart()
     }
 
-    private fun generateGrid() {
-        val grid = RecursiveGenerator(Server.config.gridWidth, Server.config.gridHeight).generate()
-        players.forEach {
-            it.grid = grid
-            it.send(Response.setGrid(it, grid))
+    private fun showGrid() {
+        showGridDelayFinished = true
+        if (::chosenGrid.isInitialized) {
+            players.forEach {
+                it.grid = chosenGrid
+                it.send(Response.setGrid(it, it.grid))
+            }
+            running = true
         }
-        running = true
     }
 
     private fun onMove(client: Client, move: MoveMessage) {
