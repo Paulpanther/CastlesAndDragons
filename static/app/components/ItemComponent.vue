@@ -111,7 +111,7 @@
         background-image: url("../assets/castle_mud_1.png")
     &[data-type="12"]
         background-image: url("../assets/castle_mud_2.png")
-    &[data-type="14"]
+    &[data-type="13"]
         background-image: url("../assets/dragon_stone.png")
     &[data-type="14"]
         background-image: url("../assets/dragon_mud.png")

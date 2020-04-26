@@ -1,5 +1,6 @@
 package com.paulmethfessel.cad.util
 
+import com.paulmethfessel.cad.server.Server
 import java.util.*
 import kotlin.concurrent.schedule
 
@@ -10,24 +11,28 @@ class DelayTimer(
         private val onStart: () -> Unit = {},
         private val onStop: () -> Unit = {}) {
 
-    private val timer = Timer(name, true)
+    private var timer: Timer? = null
     private var running = false
     val isRunning get() = running
 
     fun restart() {
         if (isRunning) {
-            timer.cancel()
+            timer?.cancel()
         }
 
         running = true
         onStart()
-        timer.schedule(delay.toLong()) { onDelay() }
+        timer = Timer(name, true)
+        timer?.schedule(delay.toLong()) {
+            Logger.debug("Timer has run")
+            onDelay()
+        }
     }
 
     fun stop() {
         if (running) {
             running = false
-            timer.cancel()
+            timer?.cancel()
             onStop()
         }
     }

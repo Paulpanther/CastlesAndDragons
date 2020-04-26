@@ -1,11 +1,13 @@
 package com.paulmethfessel.cad.server
 
 import com.paulmethfessel.cad.model.Grid
+import com.paulmethfessel.cad.util.Logger
 import org.java_websocket.WebSocket
 import org.java_websocket.handshake.ClientHandshake
 import org.java_websocket.server.WebSocketServer
 import java.lang.Exception
 import java.net.InetSocketAddress
+import kotlin.system.exitProcess
 
 object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
 
@@ -13,10 +15,9 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     private val listeners = mutableListOf<ClientListener>()
 
     fun runServer() {
+        isReuseAddr = true
         start()
         println("Websocket server running on port ${this.port}")
-
-        Runtime.getRuntime().addShutdownHook(Thread { shutdown() })
 
         run@ do {
             when (readLine()) {
@@ -25,6 +26,7 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
                 "restart" -> restart()
             }
         } while (true)
+        Logger.debug("From cmd")
         shutdown()
     }
 
@@ -34,8 +36,10 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     }
 
     private fun shutdown() {
-        println("Shutdown")
-        stop()
+        clients.clear()
+        stop(500)
+        println("Shutdown started")
+        exitProcess(0)
     }
 
     override fun onStart() {}
@@ -53,7 +57,7 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     }
 
     override fun onMessage(conn: WebSocket?, str: String?) {
-        println("New Message: $str")
+        Logger.debug("New Message: $str")
         val parsed = Message.parse(str)
         if (parsed.type == MessageType.RESTART) {
             restart()
@@ -62,7 +66,9 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     }
 
     override fun onClose(conn: WebSocket?, code: Int, reason: String?, remote: Boolean) {
-        notifyListeners(conn) { l, c -> l.onLeave(c) }
+        if (remote) {
+            notifyListeners(conn) { l, c -> l.onLeave(c) }
+        }
     }
 
     override fun onError(conn: WebSocket?, ex: Exception?) {
@@ -97,11 +103,11 @@ class Client(
     lateinit var grid: Grid
 
     fun send(text: String) {
-        println("Sending: $text")
+        Logger.debug("Sending: $text")
         if (socket.isOpen) {
             socket.send(text)
         } else {
-            println("ERROR: Connection not open. Did not send: $text")
+            Logger.error("ERROR: Connection not open. Did not send: $text")
         }
     }
 

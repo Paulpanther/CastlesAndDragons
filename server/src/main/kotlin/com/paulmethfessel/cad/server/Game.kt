@@ -5,6 +5,8 @@ import com.paulmethfessel.cad.model.Grid
 import com.paulmethfessel.cad.solver.GridSolver
 import com.paulmethfessel.cad.util.DelayTimer
 import com.paulmethfessel.cad.util.ListExt.without
+import com.paulmethfessel.cad.util.Logger
+import org.slf4j.LoggerFactory
 
 class Game(players: MutableList<Client>): Room(players) {
 
@@ -15,17 +17,22 @@ class Game(players: MutableList<Client>): Room(players) {
     init {
         players.forEach { it.grid = Grid(Server.config.gridWidth, Server.config.gridHeight) }
         sendTo(players, Response.startGame(Server.config.gridWidth, Server.config.gridHeight, Server.config.showGridDelay))
+
+        Logger.debug("Start Timer in Game")
         delayTimer.restart()
-        println("Start Game")
+        Logger.debug("Start Game")
     }
 
     private fun generateGrid() {
+        Logger.debug("Start finished")
         val grid = RecursiveGenerator(Server.config.gridWidth, Server.config.gridHeight).generate()
+        Logger.debug("Generation finished")
         players.forEach {
             it.grid = grid
             it.send(Response.setGrid(it, grid))
         }
         running = true
+        Logger.debug("Sending finished")
     }
 
     private fun onMove(client: Client, move: MoveMessage) {
