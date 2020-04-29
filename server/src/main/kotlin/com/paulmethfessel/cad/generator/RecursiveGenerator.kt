@@ -25,7 +25,7 @@ class RecursiveGenerator(
         // recursively choose items until grid is finished
         chooseNextItem()
 
-        removeStreetsFromGrid()
+//        removeStreetsFromGrid()
         return grid
     }
 

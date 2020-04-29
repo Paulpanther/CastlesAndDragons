@@ -86,17 +86,17 @@
         }
 
         private callMethodForMessage(message: Message) {
-            console.log(message.get("type"));
             switch (message.get("type")) {
                 case "setGrid": return this.setGrid(message);
                 case "finished": return this.trueFinished(message);
                 case "notFinished": return this.falseFinished(message);
+                case "won": return this.won(message);
                 case "gameStart": return this.nextGame(message);
+                case "left": return this.onLeave(message);
             }
         }
 
         private falseFinished(message: Message) {
-            console.log("false finished");
             const player = Player.parse(message.get("client"));
             if (player.id === this.self.id) {
                 alert("You lost")
@@ -104,13 +104,22 @@
         }
 
         private trueFinished(message: Message) {
-            console.log("true finished");
             const player = Player.parse(message.get("client"));
             if (player.id === this.self.id) {
                 alert("You won!");
             } else {
-                alert(`Player "${player.name} won!`)
+                alert(`Player "${player.name}" won!`)
             }
+        }
+
+        public won(message: Message) {
+            const player = Player.parse(message.get("client"));
+            if (player.id === this.self.id) {
+                alert("You won the Game!");
+            } else {
+                alert(`Player "${player.name}" won the Game!`);
+            }
+            this.startWaitingRoom();
         }
 
         public nextGame(message: Message) {
@@ -123,11 +132,30 @@
             });
         }
 
+        public startWaitingRoom() {
+            this.stopListening();
+            EventBus.$emit("gameend", {
+                self: this.self,
+                others: this.others,
+            });
+        }
+
         public setGrid(message: Message) {
             this.gameStarted = true;
             const forPlayer = Player.parse(message.get("client"));
             if (forPlayer.id === this.self.id) {
                 this.$refs.board.updateGrid(message.get("grid"));
+            }
+        }
+
+        public onLeave(message: Message) {
+            const forPlayer = Player.parse(message.get("client"));
+            if (forPlayer.id !== this.self.id) {
+                const otherPlayerIndex = this.others.findIndex(p => p.id === forPlayer.id);
+                if (otherPlayerIndex !== -1) {
+                    this.others.splice(otherPlayerIndex, 1);
+                    this.startWaitingRoom();
+                }
             }
         }
 

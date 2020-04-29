@@ -96,13 +96,16 @@ class Game(players: MutableList<Client>): Room(players) {
                         // Player has won
                         sendTo(players, Response.won(client))
                         players.forEach { it.reset() }
+
+                        running = false
+                        switchTo(::WaitingRoom)
                     } else {
                         sendTo(players, Response.finished(client))
-                    }
 
-                    // Start new Game
-                    running = false
-                    switchTo(::Game)
+                        // Start new Game
+                        running = false
+                        switchTo(::Game)
+                    }
                 }
             }
         }
