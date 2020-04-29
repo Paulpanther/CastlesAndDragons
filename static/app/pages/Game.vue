@@ -60,6 +60,8 @@
 
         public mounted() {
             EventBus.$on("gamestart", (event) => {
+                this.drawerItems = Item.startItems();
+                this.finished = false;
                 this.$refs.board.gameWidth = parseInt(event.gameWidth);
                 this.$refs.board.gameHeight = parseInt(event.gameHeight);
                 this.gameStartsDelay = parseInt(event.gameDelay);
@@ -84,6 +86,7 @@
         }
 
         private callMethodForMessage(message: Message) {
+            console.log(message.get("type"));
             switch (message.get("type")) {
                 case "setGrid": return this.setGrid(message);
                 case "finished": return this.trueFinished(message);
@@ -93,6 +96,7 @@
         }
 
         private falseFinished(message: Message) {
+            console.log("false finished");
             const player = Player.parse(message.get("client"));
             if (player.id === this.self.id) {
                 alert("You lost")
@@ -100,6 +104,7 @@
         }
 
         private trueFinished(message: Message) {
+            console.log("true finished");
             const player = Player.parse(message.get("client"));
             if (player.id === this.self.id) {
                 alert("You won!");

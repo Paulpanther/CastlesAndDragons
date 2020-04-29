@@ -136,6 +136,14 @@ class Grid(val width: Int, val height: Int) : NeighborSupplier, Iterable<GridIte
         return rowsStrings.joinToString("\n", "Grid:\n", "\n")
     }
 
+    fun clone(): Grid {
+        val cloned = Grid(width, height)
+        val states = itemStates.map { ItemState(it.item, cloned, it.up) }
+        cloned.itemStates.forEachIndexed { i, _ -> cloned.itemStates[i] = states[i] }
+        cloned.heroPos = heroPos.clone()
+        return cloned
+    }
+
     fun toShortString(): String {
         val hero = heroToShortString()
         return itemStates.joinToString("", "${width}w${height}h${hero}p") { it.toShortString() }

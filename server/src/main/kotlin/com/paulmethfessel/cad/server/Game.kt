@@ -47,13 +47,14 @@ class Game(players: MutableList<Client>): Room(players) {
         showGridDelayFinished = true
         if (::chosenGrid.isInitialized) {
             players.forEach {
-                it.grid = chosenGrid
+                it.grid = chosenGrid.clone()
                 it.send(Response.setGrid(it, it.grid))
             }
             running = true
         }
     }
 
+    // TODO move places on wrong
     private fun onMove(client: Client, move: MoveMessage) {
         moveLock.withLock {
             if (running && client in playersInGame) {

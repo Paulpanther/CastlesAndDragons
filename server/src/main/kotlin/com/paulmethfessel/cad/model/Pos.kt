@@ -48,5 +48,7 @@ data class Pos(var x: Int, var y: Int) {
     }
 
     override fun toString() = "($x, $y)"
+
+    fun clone() = Pos(x, y)
 }
 
