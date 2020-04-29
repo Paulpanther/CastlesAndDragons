@@ -98,7 +98,8 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     private fun allIds() = clients.map { it.id }
 
     private fun notifyListeners(conn: WebSocket?, run: (ClientListener, Client) -> Unit) {
-        clientFromSocket(conn)?.let { client -> listeners.forEach { l -> run(l, client) } }
+        val copiedListeners = listeners.toList()
+        clientFromSocket(conn)?.let { client -> copiedListeners.forEach { l -> run(l, client) } }
     }
 
     private fun clientFromSocket(socket: WebSocket?) = clients.find { it.socket == socket }
