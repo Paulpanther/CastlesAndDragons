@@ -50,8 +50,8 @@ object Server {
     }
 
     fun reset() {
-        rooms.forEach { closeRoom(it) }
-        games.forEach { closeRoom(it) }
+        rooms.toList().forEach { closeRoom(it) }
+        games.toList().forEach { closeRoom(it) }
         openRoom(WaitingRoom())
     }
 

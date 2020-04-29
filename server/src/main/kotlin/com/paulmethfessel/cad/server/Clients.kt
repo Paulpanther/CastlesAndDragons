@@ -42,6 +42,7 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     private fun restart() {
         clients.clear()
         Server.reset()
+        Server.log.info(tag, "Restarted")
     }
 
     private fun shutdown() {

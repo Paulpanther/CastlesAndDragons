@@ -120,6 +120,6 @@ class Game(players: MutableList<Client>): Room(players) {
         sendTo(players.without(client), Response.left(client))
         delayTimer.stop()
         stopListening()
-        close()
+        switchTo(::WaitingRoom)
     }
 }
