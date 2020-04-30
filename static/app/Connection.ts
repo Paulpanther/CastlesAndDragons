@@ -25,26 +25,30 @@ export default class Connection {
     }
 
     public static addListener(listener: ConnectionListener) {
-        this.listeners.push(listener);
+        if (!this.listeners.includes(listener)) {
+            this.listeners.push(listener);
+        }
     }
 
     public static removeListener(listener: ConnectionListener) {
-        this.listeners.splice(this.listeners.indexOf(listener), 1);
+        if (this.listeners.includes(listener)) {
+            this.listeners.splice(this.listeners.indexOf(listener), 1);
+        }
     }
 }
 
 @Component
 export abstract class ConnectionListener extends Vue {
 
-    created() {
-        Connection.addListener(this);
-    }
-
     abstract onMessage(message: Message);
 
     protected send(message: string) {
         Connection.send(message);
         console.log("Send: " + message);
+    }
+
+    protected startListening() {
+        Connection.addListener(this);
     }
 
     protected stopListening() {

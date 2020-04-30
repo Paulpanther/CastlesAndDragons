@@ -60,6 +60,7 @@
 
         public mounted() {
             EventBus.$on("gamestart", (event) => {
+                this.startListening();
                 this.drawerItems = Item.startItems();
                 this.finished = false;
                 this.$refs.board.gameWidth = parseInt(event.gameWidth);

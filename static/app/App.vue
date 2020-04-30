@@ -22,12 +22,12 @@
             }
         },
         created() {
-            EventBus.$on("gamestart", () => {
-                console.log("Event: gamestart");
+            EventBus.$on("gamestart", event => {
+                console.log("gamestart: " + JSON.stringify(event));
                 this.inGame = true;
             });
-            EventBus.$on("gameend", () => {
-                console.log("Event: gameend");
+            EventBus.$on("gameend", event => {
+                console.log("gameend: " + JSON.stringify(event));
                 this.inGame = false;
             })
         }

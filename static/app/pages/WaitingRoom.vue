@@ -36,6 +36,7 @@
         private gameStartTimer = new TickingTimer();
 
         public mounted() {
+            this.startListening();
             EventBus.$on("gameend", (event) => {
                 this.self = event.self;
                 this.connectedPlayers = event.others;

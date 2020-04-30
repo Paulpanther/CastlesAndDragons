@@ -79,6 +79,7 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     override fun onClose(conn: WebSocket?, code: Int, reason: String?, remote: Boolean) {
         if (remote) {
             notifyListeners(conn) { l, c -> l.onLeave(c) }
+            clients.removeIf { it.socket == conn }
         }
     }
 
