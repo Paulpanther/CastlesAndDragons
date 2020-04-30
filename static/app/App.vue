@@ -23,9 +23,11 @@
         },
         created() {
             EventBus.$on("gamestart", () => {
+                console.log("Event: gamestart");
                 this.inGame = true;
             });
             EventBus.$on("gameend", () => {
+                console.log("Event: gameend");
                 this.inGame = false;
             })
         }

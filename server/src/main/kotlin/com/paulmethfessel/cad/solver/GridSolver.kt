@@ -8,8 +8,8 @@ class GridSolver(private val grid: Grid) {
         fun isFinished(grid: Grid, hardness: Int) = GridSolver(grid).isFinished(hardness)
     }
 
-    fun findAllConnections(pos: ItemState, found: Set<ItemState> = setOf(pos)): Set<ItemState> {
-        val connections = pos.getConnectedNeighbors()
+    private fun findAllConnections(pos: ItemState, found: Set<ItemState> = setOf(pos)): Set<ItemState> {
+        val connections = getConnectedNeighbors(pos)
         val newConnections = connections.filter { it !in found }
         val allFound = (found + newConnections).toMutableSet()
         for (newConnection in newConnections) {
@@ -23,9 +23,9 @@ class GridSolver(private val grid: Grid) {
             return false
         }
 
-        val castles = getPositionsForType(ItemType.CASTLE).all { isConnected(it, grid.heroStartPos()) }
-        val anyDragon = getPositionsForType(ItemType.DRAGON).any { isConnected(it, grid.heroStartPos()) }
-        val allDragons = getPositionsForType(ItemType.DRAGON).all { isConnected(it, grid.heroStartPos()) }
+        val castles = getPositionsForType(ItemType.CASTLE).all { isConnected(grid.heroStartPos(), it) }
+        val anyDragon = getPositionsForType(ItemType.DRAGON).any { isConnected(grid.heroStartPos(), it) }
+        val allDragons = getPositionsForType(ItemType.DRAGON).all { isConnected(grid.heroStartPos(), it) }
         return when (hardness) {
             0 -> castles
             1 -> castles && anyDragon
@@ -45,6 +45,14 @@ class GridSolver(private val grid: Grid) {
             state.streetAt(orientation) != StreetType.NONE
         } else {
             false
+        }
+    }
+
+    private fun getConnectedNeighbors(state: ItemState): List<ItemState> {
+        return if (state.item.type == ItemType.DRAGON) {
+            listOf()
+        } else {
+            state.getConnectedNeighbors()
         }
     }
 

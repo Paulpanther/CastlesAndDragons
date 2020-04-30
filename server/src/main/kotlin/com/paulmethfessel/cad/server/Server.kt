@@ -40,6 +40,7 @@ object Server {
         } else if (room is Game) {
             games += games
         }
+        log.info(tag, "Open Rooms: WaitingRooms=${rooms.size}, Games=${games.size}")
     }
 
     fun <T: Room> switchRoom(old: Room, next: (players: MutableList<Client>) -> T): T {

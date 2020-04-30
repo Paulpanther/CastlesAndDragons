@@ -11,6 +11,7 @@ class SolverTest {
     private lateinit var finishedGrid2: Grid
     private lateinit var unfinishedGrid1: Grid
     private lateinit var unfinishedGrid2: Grid
+    private lateinit var unfinishedGrid3: Grid
 
     @BeforeTest
     fun setup() {
@@ -36,6 +37,14 @@ class SolverTest {
         unfinishedGrid2.heroPos = Pos(-1, 2)
         unfinishedGrid2.setItem(0, 2, Items.LINE_STONE)
         unfinishedGrid2.setItem(0, 3, Items.CASTLE_STONE_1, Orientation.SOUTH)
+
+        // Moving through a dragon isn't permitted
+        unfinishedGrid3 = Grid(15, 5)
+        unfinishedGrid3.heroPos = Pos(-1, 3)
+        unfinishedGrid3.setItem(0, 3, Items.THREE_3)
+        unfinishedGrid3.setItem(0, 3, Items.CASTLE_MUD_1, Orientation.EAST)
+        unfinishedGrid3.setItem(1, 3, Items.DRAGON_STONE)
+        unfinishedGrid3.setItem(2, 3, Items.CASTLE_STONE_1)
     }
 
     @Test
@@ -43,6 +52,7 @@ class SolverTest {
         assertTrue(GridSolver.isFinished(finishedGrid1, 1))
         assertTrue(GridSolver.isFinished(finishedGrid2, 0))
         assertFalse(GridSolver.isFinished(unfinishedGrid1, 0))
+        assertFalse(GridSolver.isFinished(unfinishedGrid2, 0))
         assertFalse(GridSolver.isFinished(unfinishedGrid2, 0))
         assertFalse(GridSolver.isFinished(finishedGrid1, 2))
     }
