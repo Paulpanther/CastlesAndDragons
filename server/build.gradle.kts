@@ -10,7 +10,7 @@ repositories {
 }
 
 group = "com.paulmethfessel"
-version = "0.1.0"
+version = "0.2.0"
 
 sourceSets.getByName("main") {
     java.srcDir("src/main/java")

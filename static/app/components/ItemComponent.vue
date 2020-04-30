@@ -66,7 +66,6 @@
                 // }, rotationTime);
                 this.item.up = mod(this.item.up + 1, 4);
                 this.rotation = this.item.up;
-                console.log("ROTATEEEEEE");
             }
         }
 

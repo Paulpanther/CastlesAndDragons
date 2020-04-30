@@ -1,15 +1,19 @@
 {
   "name": "castlesanddragonsclient",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Frustrating online game to play with your local Antonius",
+  "author": "Paul Methfessel",
+  "version": "0.2.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Paulpanther/CastlesAndDragons.git"
+  },
+  "private": true,
   "scripts": {
     "start": "parcel index.pug",
     "build": "parcel build index.pug",
     "release": "./scripts/release.sh"
   },
-  "author": "Paul Methfessel",
-  "license": "MIT",
   "alias": {
     "vue": "./node_modules/vue/dist/vue.common.js"
   },
