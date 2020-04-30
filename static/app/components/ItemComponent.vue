@@ -4,7 +4,7 @@
         :data-type="type"
         :data-rotation="rotation"
         :data-rotatable="rotatable"
-        :class="{noTransition: !useTransition}"
+        :class="{no_transition: !useTransition}"
         @click="$emit('click', $event)")
 </template>
 
@@ -28,41 +28,52 @@
 
         public type = 0;
         public rotation = 0;
-        public useTransition = true;
+        // public useTransition = true;
+        public useTransition = false;
 
         private isRotating = false;
 
         public mounted() {
-            document.addEventListener("keydown", event => {
-                if (this.rotatable && event.key === "r") {
-                    this.rotate();
-                }
-            });
+            document.addEventListener("keydown", this.keyListener);
             this.type = this.item?.type || this.type;
             this.updateRotation();
         }
 
+        public destroyed() {
+            document.removeEventListener("keydown", this.keyListener);
+        }
+
+        private keyListener(event: KeyboardEvent) {
+            if (this.rotatable && event.key === "r") {
+                this.rotate();
+            }
+        }
+
         private rotate() {
             if (!this.isRotating) {
-                this.useTransition = true;
-
-                this.item.up = mod(this.item.up - 1, 4);
+                // this.useTransition = true;
+                //
+                // this.item.up = mod(this.item.up - 1, 4);
+                // this.rotation = this.item.up;
+                //
+                // this.isRotating = true;
+                //
+                // setTimeout(() => {
+                //     if (this.rotation === 0) {
+                //         this.rotation = 4;
+                //     }
+                //     this.isRotating = false;
+                // }, rotationTime);
+                this.item.up = mod(this.item.up + 1, 4);
                 this.rotation = this.item.up;
-
-                this.isRotating = true;
-
-                setTimeout(() => {
-                    if (this.rotation === 0) {
-                        this.rotation = 4;
-                    }
-                    this.isRotating = false;
-                }, rotationTime);
+                console.log("ROTATEEEEEE");
             }
         }
 
         private updateRotation(item = this.item) {
             if (item) {
-                this.rotation = item.up === 0 ? 4 : item.up;
+                // this.rotation = item.up === 0 ? 4 : item.up;
+                this.rotation = item.up;
             }
         }
 
@@ -79,11 +90,11 @@
 .item
     background-size: cover
 
-    &.no-transition
-        transition: none
-
     &[data-rotatable]
         transition: transform ease 0.2s
+
+    &.no_transition
+        transition: none
 
     &[data-type="0"]
         background-image: url("../assets/empty.png")
