@@ -135,6 +135,7 @@
                     &:before
                         display: block
                         content: ""
+                        float: left
 
                 &[class*=" hero"] .wrapper:before
                     z-index: 2

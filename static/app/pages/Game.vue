@@ -12,14 +12,10 @@
                 PlayerList(ref="playerList" :players="others")
                 button#finish(v-on:click="finish") Finish
 
-            .drawer(v-on:click="onDrawerClick()")
-                .slot(
-                    v-for="index in drawerStartItemsCount"
-                    :key="index")
-                    ItemComponent(
-                        v-show="drawerItems[index - 1]"
-                        :item="drawerItems[index - 1]"
-                        @click="onItemClick(drawerItems[index - 1], $event)")
+            Drawer(
+                ref="drawer"
+                v-on:click="onDrawerClick($event)"
+                v-on:item-click="onItemClick($event.item, $event)")
 
         .free-items
             ItemComponent(
@@ -35,7 +31,6 @@
 
 <script lang="ts">
     import Component from "vue-class-component";
-    import * as _ from "lodash";
     import {ConnectionListener, Message} from "../Connection";
     import Player from "../model/Player";
     import {EventBus} from "../App.vue";
@@ -44,12 +39,10 @@
     import Board, {SlotClickEvent} from "../components/Board.vue";
     import ItemComponent from "../components/ItemComponent.vue";
     import PlayerList from "../components/PlayerList.vue";
+    import Drawer from "../components/Drawer.vue";
 
-    @Component({ components: {PlayerList, Board, ItemComponent} })
+    @Component({ components: {Drawer, PlayerList, Board, ItemComponent} })
     export default class Game extends ConnectionListener {
-
-        public drawerItems: Item[] = Item.startItems();
-        public readonly drawerStartItemsCount = Item.startItems().length;
 
         public freeItem: Item = null;
         public freeItemPos: Pos = new Pos(0, 0);
@@ -69,7 +62,8 @@
 
         $refs!: {
             board: Board,
-            playerList: PlayerList
+            playerList: PlayerList,
+            drawer: Drawer
         };
 
         public mounted() {
@@ -79,12 +73,12 @@
                 const gameWidth = parseInt(event.gameWidth);
                 const gameHeight = parseInt(event.gameHeight);
 
-                this.drawerItems = Item.startItems();
                 this.finished = false;
                 this.gameStartsDelay = parseInt(event.gameDelay);
                 this.self = event.self;
                 this.others = event.others;
 
+                this.$refs.drawer.reset();
                 this.$refs.board.gameWidth = gameWidth;
                 this.$refs.board.gameHeight = gameHeight;
                 this.$refs.board.player = event.self;
@@ -184,9 +178,8 @@
 
         public onItemClick(item: Item, event) {
             if (this.freeItem === null) {
-                const inDrawer = this.drawerItems.findIndex(i => i && i.type === item.type);
-                if (inDrawer !== -1) {
-                    this.drawerItems[inDrawer] = null;
+                const inDrawer = this.$refs.drawer.removeItemWithType(item.type);
+                if (inDrawer) {
                     this.freeItem = item;
                     this.updateFreeItemSize();
                     this.freeItemPos = new Pos(event.x - this.freeItemSize.width / 2,
@@ -203,9 +196,7 @@
             }
 
             if (this.freeItem !== null) {
-                const drawerPos = Item.startItems().findIndex(i => i.type === this.freeItem.type);
-                if (drawerPos !== -1 && this.drawerItems[drawerPos] === null) {
-                    this.drawerItems[drawerPos] = this.freeItem;
+                if (this.$refs.drawer.setItem(this.freeItem)) {
                     this.freeItem = null;
                 }
             }
@@ -308,26 +299,6 @@
 
     .drawer
         grid-area: drawer
-        display: flex
-        flex-direction: row
-        justify-content: stretch
-        width: 100%
-
-        background: #ddd
-
-        .slot
-            width: inherit
-            margin: 10px
-
-            &::before
-                content: ""
-                float: left
-                padding-top: 100%
-
-            .item
-                width: 100%
-                height: 100%
-
 
     .free-items
         position: absolute
