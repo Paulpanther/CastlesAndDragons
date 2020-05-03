@@ -2,26 +2,35 @@
     #game
         h4(v-if="isGameStarting") Game starts in: {{ gameStartsCountdown }}
 
-        Board(
-            ref="board"
-            :clickable="gameStarted && !finished"
-            v-on:slot-click="onSlotClick($event)")
+        .game-grid
+            Board#player-board(
+                ref="board"
+                :clickable="gameStarted && !finished"
+                v-on:slot-click="onSlotClick($event)")
 
-        button#finish(v-on:click="finish") Finish
+            .player-list-and-finish
+                PlayerList(ref="playerList" :players="others")
+                button#finish(v-on:click="finish") Finish
 
-        .drawer(v-on:click="onDrawerClick()")
-            ItemComponent(
-                v-for="item in drawerItems"
-                :key="item.type"
-                :item="item"
-                @click="onItemClick(item, $event)")
+            .drawer(v-on:click="onDrawerClick()")
+                .slot(
+                    v-for="index in drawerStartItemsCount"
+                    :key="index")
+                    ItemComponent(
+                        v-show="drawerItems[index - 1]"
+                        :item="drawerItems[index - 1]"
+                        @click="onItemClick(drawerItems[index - 1], $event)")
 
         .free-items
             ItemComponent(
-                v-if="freeItem !== null"
+                v-show="freeItem"
                 :item="freeItem"
                 rotatable="true"
-                v-bind:style="{ top: freeItemPos.y + 'px', left: freeItemPos.x + 'px' }")
+                v-bind:style="{\
+                    top: freeItemPos.y + 'px',\
+                    left: freeItemPos.x + 'px',\
+                    width: freeItemSize.width + 'px',\
+                    height: freeItemSize.height + 'px' }")
 </template>
 
 <script lang="ts">
@@ -34,13 +43,17 @@
     import Pos from "../model/Pos";
     import Board, {SlotClickEvent} from "../components/Board.vue";
     import ItemComponent from "../components/ItemComponent.vue";
+    import PlayerList from "../components/PlayerList.vue";
 
-    @Component({ components: {Board, ItemComponent} })
+    @Component({ components: {PlayerList, Board, ItemComponent} })
     export default class Game extends ConnectionListener {
 
         public drawerItems: Item[] = Item.startItems();
+        public readonly drawerStartItemsCount = Item.startItems().length;
+
         public freeItem: Item = null;
         public freeItemPos: Pos = new Pos(0, 0);
+        public freeItemSize = {width: 0, height: 0};
         private justHadItemClick = false;
 
         public gameStartsDelay: number;
@@ -52,23 +65,31 @@
         public finished = false;
 
         public self: Player;
-        public others: Player[];
+        public others: Player[] = [];
 
         $refs!: {
-            board: Board
+            board: Board,
+            playerList: PlayerList
         };
 
         public mounted() {
             EventBus.$on("gamestart", (event) => {
                 this.startListening();
+
+                const gameWidth = parseInt(event.gameWidth);
+                const gameHeight = parseInt(event.gameHeight);
+
                 this.drawerItems = Item.startItems();
                 this.finished = false;
-                this.$refs.board.gameWidth = parseInt(event.gameWidth);
-                this.$refs.board.gameHeight = parseInt(event.gameHeight);
                 this.gameStartsDelay = parseInt(event.gameDelay);
                 this.self = event.self;
-                this.$refs.board.player = event.self;
                 this.others = event.others;
+
+                this.$refs.board.gameWidth = gameWidth;
+                this.$refs.board.gameHeight = gameHeight;
+                this.$refs.board.player = event.self;
+                this.$refs.playerList.startWidth = gameWidth;
+                this.$refs.playerList.startHeight = gameHeight;
 
                 this.gameStartTime = Date.now() + this.gameStartsDelay;
                 this.isGameStarting = true;
@@ -77,7 +98,8 @@
             });
             document.addEventListener("mousemove", (event: MouseEvent) => {
                 if (this.freeItem !== null) {
-                    this.freeItemPos = new Pos(event.x, event.y);
+                    this.freeItemPos = new Pos(event.x - this.freeItemSize.width / 2,
+                        event.y - this.freeItemSize.height / 2);
                 }
             });
         }
@@ -162,11 +184,13 @@
 
         public onItemClick(item: Item, event) {
             if (this.freeItem === null) {
-                const inDrawer = this.drawerItems.findIndex(i => i.type === item.type);
+                const inDrawer = this.drawerItems.findIndex(i => i && i.type === item.type);
                 if (inDrawer !== -1) {
-                    this.drawerItems.splice(inDrawer, 1);
+                    this.drawerItems[inDrawer] = null;
                     this.freeItem = item;
-                    this.freeItemPos = new Pos(event.x, event.y);
+                    this.updateFreeItemSize();
+                    this.freeItemPos = new Pos(event.x - this.freeItemSize.width / 2,
+                        event.y - this.freeItemSize.height / 2);
                 }
                 this.justHadItemClick = true;
             }
@@ -179,9 +203,11 @@
             }
 
             if (this.freeItem !== null) {
-                this.drawerItems.push(this.freeItem);
-                this.drawerItems = _.sortBy(this.drawerItems, i => i.type);
-                this.freeItem = null;
+                const drawerPos = Item.startItems().findIndex(i => i.type === this.freeItem.type);
+                if (drawerPos !== -1 && this.drawerItems[drawerPos] === null) {
+                    this.drawerItems[drawerPos] = this.freeItem;
+                    this.freeItem = null;
+                }
             }
         }
 
@@ -205,7 +231,8 @@
             } else if (!Item.pickableTypes().includes(itemAtPos.type) && !this.finished) {
                 this.$refs.board.setItem(x, y, Item.empty());
                 this.freeItem = itemAtPos;
-                this.freeItemPos = new Pos(event.x, event.y);
+                this.freeItemPos = new Pos(event.x - this.freeItemSize.width / 2,
+                    event.y - this.freeItemSize.height / 2);
                 this.send(Message.removeItem(new Pos(x,y), itemAtPos));
             }
         }
@@ -223,28 +250,84 @@
                 this.isGameStarting = false;
             }
         }
+
+        public updateFreeItemSize() {
+            const slot = document.querySelector("#player-board .slot") as HTMLDivElement;
+            if (slot) {
+                this.freeItemSize = {
+                    width: slot.clientWidth,
+                    height: slot.clientHeight,
+                }
+            } else {
+                this.freeItemSize = {
+                    width: 0,
+                    height: 0
+                }
+            }
+        }
     }
 </script>
 
 <style lang="sass" scoped>
 
 #game
-    width: 100%
+    display: flex
+    flex-direction: column
+    justify-content: center
+
+    width: 800px
     height: 100vh
 
+    margin: 0 auto
+
     .item
-        width: 100px
-        height: 100px
         background-size: cover
 
+    .game-grid
+        display: grid
+        grid-template-columns: 4fr 1fr
+        grid-template-rows: auto auto
+        grid-template-areas: "board player-list-and-finish" "drawer drawer"
+        gap: 20px
+
+        .board
+            grid-area: board
+            flex-grow: 1
+            height: 100%
+
+        .player-list-and-finish
+            grid-area: player-list-and-finish
+            display: flex
+            flex-direction: column
+
+            .player-list
+                width: 100%
+
+            #finish
+                flex-grow: 1
+
     .drawer
+        grid-area: drawer
         display: flex
         flex-direction: row
-        flex-wrap: wrap
+        justify-content: stretch
         width: 100%
 
-        .item
+        background: #ddd
+
+        .slot
+            width: inherit
             margin: 10px
+
+            &::before
+                content: ""
+                float: left
+                padding-top: 100%
+
+            .item
+                width: 100%
+                height: 100%
+
 
     .free-items
         position: absolute

@@ -78,9 +78,11 @@
 
         @Watch("item")
         public onItemChange(newItem: Item, oldItem: Item) {
-            this.useTransition = false;
-            this.updateRotation(newItem);
-            this.type = newItem.type;
+            if (newItem) {
+                this.useTransition = false;
+                this.updateRotation(newItem);
+                this.type = newItem.type;
+            }
         }
     }
 </script>

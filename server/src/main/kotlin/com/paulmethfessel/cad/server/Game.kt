@@ -48,7 +48,7 @@ class Game(players: MutableList<Client>): Room(players) {
         if (::chosenGrid.isInitialized) {
             players.forEach {
                 it.grid = chosenGrid.clone()
-                it.send(Response.setGrid(it, it.grid))
+                sendToPlayers(Response.setGrid(it, it.grid))
             }
             running = true
         }

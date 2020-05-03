@@ -1,14 +1,16 @@
 <template lang="pug">
     .board(v-show="isStarted")
-        .row(
-            v-for="y in gameHeight"
-            :key="y")
-            .slot(
-                v-for="x in gameWidth"
-                :class="classForSlot(getRealPos(x, y))"
-                :key="x"
-                v-on:click="onSlotClick(getRealPos(x, y), $event)")
-                ItemComponent(:item="itemAt(getRealPos(x, y))")
+        .field
+            .row(
+                v-for="y in gameHeight"
+                :key="y")
+                .slot(
+                    v-for="x in gameWidth"
+                    :class="classForSlot(getRealPos(x, y))"
+                    :key="x"
+                    v-on:click="onSlotClick(getRealPos(x, y), $event)")
+                    .wrapper
+                        ItemComponent(:item="itemAt(getRealPos(x, y))")
 </template>
 
 <script lang="ts">
@@ -40,8 +42,10 @@
         @Prop({default: false})
         public clickable: boolean;
 
-        public start() {
+        public start(width?: number, height?: number) {
             this.isStarted = true;
+            if (width) this.gameWidth = width;
+            if (height) this.gameHeight = height;
             this.grid = new Grid(this.gameWidth, this.gameHeight);
         }
 
@@ -88,58 +92,83 @@
 </script>
 
 <style lang="sass" scoped>
-
-.board
-    position: relative
-    z-index: 0
-    width: 100%
-    background: #8BC34A
-
-    .row
+    .board
         display: flex
-        justify-content: space-around
-        line-height: 30px
+        flex-direction: column
+        justify-content: center
 
-        .slot
-            margin: 5px
-            flex: 1 0 auto
-            height: auto
+        .field
+            max-height: 100%
+            max-width: 100%
 
-            &:before
-                content: ""
-                float: left
-                padding-top: 100%
+        .row
+            display: flex
+            justify-content: space-around
+            line-height: 30px
 
-            .item
-                z-index: 1
-                width: 100%
-                height: 100%
-                border: 1px solid black
+            .slot
+                margin: calc(.5% - 1px)
+                flex: 1 0 auto
+                height: auto
+                background: #8BC34A
 
-            &[class*=" hero"]:before
-                z-index: 2
-                display: block
-                position: relative
+                &:first-of-type
+                    margin-left: 0
 
-                width: 100%
-                height: 100%
-                bottom: 50%
+                &:last-of-type
+                    margin-right: 0
 
-                pointer-events: none
-                touch-action: none
+                &:before
+                    content: ""
+                    float: left
+                    padding-top: 100%
 
-                background: url("../assets/knight.png") no-repeat center
+                .item
+                    z-index: 1
+                    width: 100%
+                    height: 100%
 
-            &.hero-0:before
-                top: -100%
-                transform: rotate(90deg)
-            &.hero-1:before
-                left: -50%
-                transform: rotate(0deg)
-            &.hero-2:before
-                bottom: 0
-                transform: rotate(270deg)
-            &.hero-3:before
-                right: -50%
-                transform: rotate(180deg)
+                .wrapper
+                    width: 100%
+                    height: 100%
+
+                    &:before
+                        display: block
+                        content: ""
+
+                &[class*=" hero"] .wrapper:before
+                    z-index: 2
+                    position: relative
+
+                    width: 100%
+                    height: 100%
+
+                    pointer-events: none
+                    touch-action: none
+
+                    background: url("../assets/knight.png") no-repeat center
+                    background-size: 30%
+
+                $hero-offset: -47%
+
+                &.hero-0 .wrapper:before
+                    top: $hero-offset
+                    transform: rotate(90deg)
+                &.hero-1 .wrapper:before
+                    left: $hero-offset
+                    transform: rotate(0deg)
+                &.hero-2 .wrapper:before
+                    bottom: $hero-offset
+                    transform: rotate(270deg)
+                &.hero-3 .wrapper:before
+                    right: $hero-offset
+                    transform: rotate(180deg)
+
+            &:first-of-type
+                .slot
+                    margin-top: 0
+
+            &:last-of-type
+                .slot
+                    margin-bottom: 0
 </style>
