@@ -7,9 +7,3 @@ new Vue({
     template: "<App/>",
     components: {App},
 })
-
-const btn = document.getElementById("restart");
-btn.addEventListener("click", () => {
-    console.log("Restart");
-    Connection.send("type=restart");
-});

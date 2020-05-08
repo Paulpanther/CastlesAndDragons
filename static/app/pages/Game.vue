@@ -1,7 +1,5 @@
 <template lang="pug">
     #game
-        h4(v-if="isGameStarting") Game starts in: {{ gameStartsCountdown }}
-
         .game-grid
             Board#player-board(
                 ref="board"
@@ -12,17 +10,19 @@
                 PlayerList(ref="playerList" :players="others")
                 button#finish(v-on:click="finish") Finish
 
-            Drawer(
-                ref="drawer"
-                v-on:click="onDrawerClick($event)"
-                v-on:item-click="onItemClick($event.item, $event)")
+            .bottom-row
+                MessageDisplay(ref="messageDisplay")
+                Drawer(
+                    ref="drawer"
+                    @click="onDrawerClick($event)"
+                    @item-click="onItemClick($event.item, $event)")
 
         .free-items
             ItemComponent(
                 v-show="freeItem"
                 :item="freeItem"
                 rotatable="true"
-                v-bind:style="{\
+                :style="{\
                     top: freeItemPos.y + 'px',\
                     left: freeItemPos.x + 'px',\
                     width: freeItemSize.width + 'px',\
@@ -40,8 +40,9 @@
     import ItemComponent from "../components/ItemComponent.vue";
     import PlayerList from "../components/PlayerList.vue";
     import Drawer from "../components/Drawer.vue";
+    import MessageDisplay from "../components/MessageDisplay.vue";
 
-    @Component({ components: {Drawer, PlayerList, Board, ItemComponent} })
+    @Component({ components: {MessageDisplay, Drawer, PlayerList, Board, ItemComponent} })
     export default class Game extends ConnectionListener {
 
         public freeItem: Item = null;
@@ -63,7 +64,8 @@
         $refs!: {
             board: Board,
             playerList: PlayerList,
-            drawer: Drawer
+            drawer: Drawer,
+            messageDisplay: MessageDisplay
         };
 
         public mounted() {
@@ -89,6 +91,10 @@
                 this.isGameStarting = true;
                 this.gameStartTick();
                 this.$refs.board.start();
+
+                setTimeout(() => {
+                    this.$refs.messageDisplay.showTimer("Starting Game", this.gameStartsDelay);
+                }, 10);
             });
             document.addEventListener("mousemove", (event: MouseEvent) => {
                 if (this.freeItem !== null) {
@@ -116,25 +122,25 @@
         private falseFinished(message: Message) {
             const player = Player.parse(message.get("client"));
             if (player.id === this.self.id) {
-                alert("You lost")
+                this.$refs.messageDisplay.show("You lost", 5000);
             }
         }
 
         private trueFinished(message: Message) {
             const player = Player.parse(message.get("client"));
             if (player.id === this.self.id) {
-                alert("You won!");
+                this.$refs.messageDisplay.show("You won this round", 5000);
             } else {
-                alert(`Player "${player.name}" won!`)
+                this.$refs.messageDisplay.show(`Player "${player.name}" won this round`, 5000);
             }
         }
 
         public won(message: Message) {
             const player = Player.parse(message.get("client"));
             if (player.id === this.self.id) {
-                alert("You won the Game!");
+                this.$refs.messageDisplay.show("You won the Game", 5000);
             } else {
-                alert(`Player "${player.name}" won the Game!`);
+                this.$refs.messageDisplay.show(`Player "${player.name}" won the Game`, 5000);
             }
             this.startWaitingRoom();
         }
@@ -278,7 +284,7 @@
         display: grid
         grid-template-columns: 4fr 1fr
         grid-template-rows: auto auto
-        grid-template-areas: "board player-list-and-finish" "drawer drawer"
+        grid-template-areas: "board player-list-and-finish" "bottom-row bottom-row"
         gap: 20px
 
         .board
@@ -297,8 +303,18 @@
             #finish
                 flex-grow: 1
 
-    .drawer
-        grid-area: drawer
+    .bottom-row
+        grid-area: bottom-row
+        position: relative
+        overflow-y: hidden
+
+        .message-display
+            position: absolute
+            width: 100%
+            height: 100%
+
+        .drawer
+            grid-area: drawer
 
     .free-items
         position: absolute
