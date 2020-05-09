@@ -122,7 +122,8 @@
         private falseFinished(message: Message) {
             const player = Player.parse(message.get("client"));
             if (player.id === this.self.id) {
-                this.$refs.messageDisplay.show("You lost", 5000);
+                this.$refs.messageDisplay.show("You lost", -1);
+                this.finished = true;
             }
         }
 
@@ -179,7 +180,7 @@
         }
 
         public onItemClick(item: Item, event) {
-            if (this.freeItem === null) {
+            if (this.freeItem === null && !this.finished) {
                 const inDrawer = this.$refs.drawer.removeItemWithType(item.type);
                 if (inDrawer) {
                     this.freeItem = item;
@@ -197,7 +198,7 @@
                 return;
             }
 
-            if (this.freeItem !== null) {
+            if (this.freeItem !== null && !this.finished) {
                 if (this.$refs.drawer.setItem(this.freeItem)) {
                     this.freeItem = null;
                 }
@@ -259,7 +260,7 @@
     flex-direction: column
     justify-content: center
 
-    width: 800px
+    width: 900px
     height: 100vh
 
     margin: 0 auto
@@ -269,7 +270,7 @@
 
     .game-grid
         display: grid
-        grid-template-columns: 4fr 1fr
+        grid-template-columns: 4fr 0.9fr
         grid-template-rows: auto auto
         grid-template-areas: "board player-list-and-finish" "bottom-row bottom-row"
         gap: 20px

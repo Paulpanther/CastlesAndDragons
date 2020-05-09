@@ -48,9 +48,11 @@
             this.text = text;
             this.active = true;
 
-            this.timer = setTimeout(() => {
-                this.cancel();
-            }, duration);
+            if (duration !== -1) {
+                this.timer = setTimeout(() => {
+                    this.cancel();
+                }, duration);
+            }
         }
     }
 </script>
