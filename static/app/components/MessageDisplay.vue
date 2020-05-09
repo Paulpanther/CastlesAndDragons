@@ -24,12 +24,10 @@
         }
 
         public show(text: string, duration: number) {
-            this.text = text;
-            this.active = true;
-
-            this.timer = setTimeout(() => {
-                this.cancel();
-            }, duration);
+            this.cancel();
+            setTimeout(() => {
+                this._show(text, duration);
+            }, 10);
         }
 
         public cancel() {
@@ -41,9 +39,18 @@
         }
 
         public showTimer(text: string, duration: number) {
+            this.show(text, duration);
             this.animationDuration = duration;
             this.useAnimation = true;
-            this.show(text, duration);
+        }
+
+        private _show(text: string, duration: number) {
+            this.text = text;
+            this.active = true;
+
+            this.timer = setTimeout(() => {
+                this.cancel();
+            }, duration);
         }
     }
 </script>

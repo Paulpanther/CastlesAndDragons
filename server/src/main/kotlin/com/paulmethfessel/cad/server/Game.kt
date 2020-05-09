@@ -6,7 +6,9 @@ import com.paulmethfessel.cad.solver.GridSolver
 import com.paulmethfessel.cad.util.DelayTimer
 import com.paulmethfessel.cad.util.ListExt.without
 import org.slf4j.MarkerFactory
+import java.util.*
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.schedule
 import kotlin.concurrent.withLock
 
 private val tag = MarkerFactory.getMarker("GAME")
@@ -17,6 +19,7 @@ class Game(players: MutableList<Client>): Room(players) {
     private var showGridDelayFinished = false
     private val playersInGame = players.toMutableList()
     private val delayTimer = DelayTimer("gameDelay", Server.config.showGridDelay, this::showGrid)
+    private val messageTimer = Timer("message_timer", true)
 
     private lateinit var chosenGrid: Grid
 
@@ -54,7 +57,6 @@ class Game(players: MutableList<Client>): Room(players) {
         }
     }
 
-    // TODO move places on wrong
     private fun onMove(client: Client, move: MoveMessage) {
         moveLock.withLock {
             if (running && client in playersInGame) {
@@ -83,6 +85,7 @@ class Game(players: MutableList<Client>): Room(players) {
         finishLock.withLock {
             if (running && client in playersInGame) {
                 val isFinished = GridSolver.isFinished(client.grid, client.level)
+                val delay = Server.config.showGridDelay
 
                 if (!isFinished) {
                     // Player has wrong solution
@@ -94,13 +97,14 @@ class Game(players: MutableList<Client>): Room(players) {
                     client.level++
                     if (client.level >= 3) {
                         // Player has won
-                        sendTo(players, Response.won(client))
+                        sendTo(players, Response.won(client, delay))
                         players.forEach { it.reset() }
 
                         running = false
+
                         switchTo(::WaitingRoom)
                     } else {
-                        sendTo(players, Response.finished(client))
+                        sendTo(players, Response.finished(client, delay))
 
                         // Start new Game
                         running = false

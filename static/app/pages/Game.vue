@@ -50,8 +50,6 @@
         public freeItemSize = {width: 0, height: 0};
         private justHadItemClick = false;
 
-        public gameStartsDelay: number;
-        public gameStartTime: number;
         public isGameStarting = false;
         public gameStartsCountdown = 0;
         public gameStarted = false;
@@ -75,25 +73,21 @@
                 const gameWidth = parseInt(event.gameWidth);
                 const gameHeight = parseInt(event.gameHeight);
 
-                this.finished = false;
-                this.gameStartsDelay = parseInt(event.gameDelay);
                 this.self = event.self;
                 this.others = event.others;
 
-                this.$refs.drawer.reset();
                 this.$refs.board.gameWidth = gameWidth;
                 this.$refs.board.gameHeight = gameHeight;
                 this.$refs.board.player = event.self;
                 this.$refs.playerList.startWidth = gameWidth;
                 this.$refs.playerList.startHeight = gameHeight;
 
-                this.gameStartTime = Date.now() + this.gameStartsDelay;
-                this.isGameStarting = true;
-                this.gameStartTick();
+                this.reset();
+
                 this.$refs.board.start();
 
                 setTimeout(() => {
-                    this.$refs.messageDisplay.showTimer("Starting Game", this.gameStartsDelay);
+                    this.$refs.messageDisplay.showTimer("Starting Game", parseInt(event.gameDelay));
                 }, 10);
             });
             document.addEventListener("mousemove", (event: MouseEvent) => {
@@ -102,6 +96,13 @@
                         event.y - this.freeItemSize.height / 2);
                 }
             });
+        }
+
+        private reset() {
+            this.finished = false;
+            this.isGameStarting = true;
+            this.gameStarted = false;
+            this.$refs.drawer.reset();
         }
 
         public onMessage(message: Message) {
@@ -114,7 +115,6 @@
                 case "finished": return this.trueFinished(message);
                 case "notFinished": return this.falseFinished(message);
                 case "won": return this.won(message);
-                case "gameStart": return this.nextGame(message);
                 case "left": return this.onLeave(message);
             }
         }
@@ -128,31 +128,27 @@
 
         private trueFinished(message: Message) {
             const player = Player.parse(message.get("client"));
+            const delay = parseInt(message.get("delay"));
             if (player.id === this.self.id) {
-                this.$refs.messageDisplay.show("You won this round", 5000);
+                this.$refs.messageDisplay.showTimer("You won this round", delay);
             } else {
-                this.$refs.messageDisplay.show(`Player "${player.name}" won this round`, 5000);
+                this.$refs.messageDisplay.showTimer(`Player "${player.name}" won this round`, delay);
             }
+            this.reset();
         }
 
         public won(message: Message) {
             const player = Player.parse(message.get("client"));
+            const delay = parseInt(message.get("delay"));
             if (player.id === this.self.id) {
-                this.$refs.messageDisplay.show("You won the Game", 5000);
+                this.$refs.messageDisplay.showTimer("You won the Game", delay);
             } else {
-                this.$refs.messageDisplay.show(`Player "${player.name}" won the Game`, 5000);
+                this.$refs.messageDisplay.showTimer(`Player "${player.name}" won the Game`, delay);
             }
-            this.startWaitingRoom();
-        }
-
-        public nextGame(message: Message) {
-            EventBus.$emit("gamestart", {
-                gameWidth: this.$refs.board.grid.width,
-                gameHeight: this.$refs.board.grid.height,
-                gameDelay: message.get("delay"),
-                self: this.self,
-                others: this.others
-            });
+            this.reset();
+            setTimeout(() => {
+                this.startWaitingRoom();
+            }, delay);
         }
 
         public startWaitingRoom() {
@@ -237,15 +233,6 @@
         public finish() {
             this.send(Message.finished());
             this.finished = true;
-        }
-
-        private gameStartTick() {
-            if (this.isGameStarting && this.gameStartTime > Date.now()) {
-                setTimeout(this.gameStartTick, 1000);
-                this.gameStartsCountdown = Math.floor((this.gameStartTime - Date.now()) / 1000);
-            } else {
-                this.isGameStarting = false;
-            }
         }
 
         public updateFreeItemSize() {

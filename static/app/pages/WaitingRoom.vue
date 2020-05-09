@@ -122,6 +122,7 @@
                 self: this.self,
                 others: this.connectedPlayers
             });
+            this.stopListening();
         }
     }
 </script>

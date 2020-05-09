@@ -12,7 +12,10 @@ class Config(parser: ArgParser) {
             help = "the delay in the waiting room before a game starts") { toInt() }.default(10000)
     private val _showGridDelay by parser.storing(
             "--show-grid-delay",
-            help = "the delay in game before the task is shown") { toInt() }.default(3000)
+            help = "the delay in game before the task is shown") { toInt() }.default(5000)
+    private val _messageDelay by parser.storing(
+            "--message-delay",
+            help = "the delay for which a message will be displayed") { toInt() }.default(5000)
 
     private val _playerCount by parser.storing(
             "--player-count",
@@ -20,6 +23,7 @@ class Config(parser: ArgParser) {
 
     val startGameDelay: Int
     val showGridDelay: Int
+    val messageDelay: Int
 
     val playerCount: Int
 
@@ -31,10 +35,12 @@ class Config(parser: ArgParser) {
         if (debugStartWithGame) {
             startGameDelay = 0
             showGridDelay = 0
+            messageDelay = 0
             playerCount = 1
         } else {
             startGameDelay = _startGameDelay
             showGridDelay = _showGridDelay
+            messageDelay = _messageDelay
             playerCount = _playerCount
         }
     }
