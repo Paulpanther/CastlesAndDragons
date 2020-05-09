@@ -44,7 +44,7 @@
         }
 
         private keyListener(event: KeyboardEvent) {
-            if (this.rotatable && event.key === "r") {
+            if (this.rotatable && this.item != null && event.key === "r") {
                 this.rotate();
             }
         }

@@ -58,6 +58,8 @@
 <style lang="sass" scoped>
     .message-display
         position: relative
+        pointer-events: none
+        touch-action: none
 
         .wrapper
             position: relative
