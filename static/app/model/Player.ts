@@ -6,7 +6,8 @@ export default class Player {
         const parts = str.split(",");
         const id = parseInt(parts[0]);
         const name = parts[1];
-        return new Player(id, name);
+        const level = parseInt(parts[2]);
+        return new Player(id, name, level);
     }
 
     public grid: Grid;

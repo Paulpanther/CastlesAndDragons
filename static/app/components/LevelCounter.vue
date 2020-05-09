@@ -25,10 +25,13 @@
         display: flex
         flex-direction: row
         justify-content: flex-end
+        align-items: center
 
         .marker
-            height: 100%
-            flex: 1 0 auto
+            width: 1em
+            height: 1em
+            margin-left: 0.1em
+
             background: red
             border-radius: 50%
 </style>

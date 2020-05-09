@@ -60,6 +60,7 @@
             if (message.get("type") === "finished" || message.get("type") === "won") {
                 const player = Player.parse(message.get("client"));
                 if (player.id === this.player.id) {
+                    this.player.level = player.level;
                     this.message = "Won";
                 }
             }

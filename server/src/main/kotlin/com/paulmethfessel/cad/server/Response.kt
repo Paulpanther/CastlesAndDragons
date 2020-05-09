@@ -22,12 +22,12 @@ object Response {
             = join(type("setGrid"), client(client), v("grid", grid.toShortString()))
 
     fun finished(client: Client, delay: Int)
-            = join(type("finished"), client(client), v("level", client.level.toString()), v("delay", delay.toString()))
+            = join(type("finished"), client(client), v("delay", delay.toString()))
     fun notFinished(client: Client) = join(type("notFinished"), client(client))
     fun won(client: Client, delay: Int) = join(type("won"), client(client), v("delay", delay.toString()))
 
     private fun error(name: String) = join(type("error"), v("error", name))
-    private fun client(client: Client) = v("client", client.id.toString(), client.name)
+    private fun client(client: Client) = v("client", client.id.toString(), client.name, client.level.toString())
     private fun type(type: String) = v("type", type)
     private fun v(key: String, vararg value: String) = "$key=${value.joinToString(",")}"
     private fun join(vararg args: String) = args.joinToString(";")
