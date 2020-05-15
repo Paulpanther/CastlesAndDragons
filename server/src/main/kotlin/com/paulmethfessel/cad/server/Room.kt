@@ -1,8 +1,11 @@
 package com.paulmethfessel.cad.server
 
-typealias RoomClass<T> = (players: MutableList<Client>) -> T;
+typealias RoomClass<T> = (roomId: String, players: MutableList<Client>) -> T
 
-abstract class Room(val players: MutableList<Client> = mutableListOf()): ClientListener() {
+abstract class Room(
+        val roomId: String,
+        val players: MutableList<Client> = mutableListOf()
+): ClientListener() {
 
     override fun onMessage(client: Client, message: Message) {
         super.onMessage(client, message)

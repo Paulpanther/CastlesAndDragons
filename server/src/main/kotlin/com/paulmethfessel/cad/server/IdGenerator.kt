@@ -14,7 +14,7 @@ object IdGenerator {
     }
 
     fun generateRandomId(idsInUse: List<String>): String {
-        var id = ""
+        var id: String
         do {
             id = Random.getString(idLength, source)
         } while (id in idsInUse)

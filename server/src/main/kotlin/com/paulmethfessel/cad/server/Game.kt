@@ -13,7 +13,7 @@ import kotlin.concurrent.withLock
 
 private val tag = MarkerFactory.getMarker("GAME")
 
-class Game(players: MutableList<Client>): Room(players) {
+class Game(roomId: String, players: MutableList<Client>): Room(roomId, players) {
 
     private var running = false
     private var showGridDelayFinished = false

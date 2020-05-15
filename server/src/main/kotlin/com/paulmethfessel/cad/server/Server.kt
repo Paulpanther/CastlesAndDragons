@@ -25,10 +25,10 @@ object Server: ClientListener() {
     override fun onMessage(client: Client, message: Message) {
         if (message.type == MessageType.ID) {
             val id = (message as RoomIdMessage).id
-            if (id == null || rooms.find { it.id == id } == null) {
+            if (id == null || rooms.find { it.roomId == id } == null) {
                 createNewWaitingRoom(client)
             } else {
-                val roomWithId = rooms.find { it.id == id }
+                val roomWithId = rooms.find { it.roomId == id }
                 if (roomWithId != null) {
                     val success = roomWithId.add(client)
                     if (!success) {
@@ -40,7 +40,7 @@ object Server: ClientListener() {
     }
 
     private fun createNewWaitingRoom(client: Client) {
-        val allIds = rooms.map { it.id }
+        val allIds = rooms.map { it.roomId }
         val newId = IdGenerator.generateRandomId(allIds)
         val newRoom = WaitingRoom(newId)
         rooms += newRoom
@@ -65,8 +65,8 @@ object Server: ClientListener() {
         log.info(tag, "Open Rooms: WaitingRooms=${rooms.size}, Games=${games.size}")
     }
 
-    fun <T: Room> switchRoom(old: Room, next: (players: MutableList<Client>) -> T): T {
-        val nextInstance = next(old.players)
+    fun <T: Room> switchRoom(old: Room, next: (roomId: String, players: MutableList<Client>) -> T): T {
+        val nextInstance = next(old.roomId, old.players)
         closeRoom(old)
         openRoom(nextInstance)
         return nextInstance

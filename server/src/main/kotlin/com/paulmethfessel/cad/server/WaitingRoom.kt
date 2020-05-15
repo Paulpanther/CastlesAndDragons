@@ -5,9 +5,9 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 class WaitingRoom(
-        val id: String,
+        roomId: String,
         players: MutableList<Client> = mutableListOf()
-) : Room(players) {
+) : Room(roomId, players) {
 
     private val timer = DelayTimer("gameStarts", Server.config.startGameDelay,
             { switchTo(::Game) },
@@ -19,8 +19,8 @@ class WaitingRoom(
     fun add(client: Client): Boolean {
         joinLock.withLock {
             return if (players.size + 1 <= Server.config.playerCount) {
-                client.roomId = id
-                client.send(Response.joinedWaitingRoom(id))
+                client.roomId = roomId
+                client.send(Response.joinedWaitingRoom(roomId))
                 client.send(Response.nameAndId(client))
                 players.add(client)
                 sendPlayersList()
