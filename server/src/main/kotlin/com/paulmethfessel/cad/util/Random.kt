@@ -1,6 +1,14 @@
 package com.paulmethfessel.cad.util
 
 object Random {
+
+    fun getString(length: Int, source: String): String {
+        return java.util.Random().ints(length.toLong(), 0, source.length)
+                .boxed()
+                .map { source[it] }
+                .toString()
+    }
+
     fun <T> shuffle(list: List<T>): List<T> {
         return multipleFrom(list.size, list)
     }

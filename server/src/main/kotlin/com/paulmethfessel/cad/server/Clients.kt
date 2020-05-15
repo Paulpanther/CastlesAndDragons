@@ -70,9 +70,6 @@ object Clients: WebSocketServer(InetSocketAddress(Server.config.port)) {
     override fun onMessage(conn: WebSocket?, str: String?) {
         Server.log.debug(tag, "in: $str")
         val parsed = Message.parse(str)
-        if (parsed.type == MessageType.RESTART) {
-            restart()
-        }
         notifyListeners(conn) { l, c -> l.onMessage(c, parsed) }
     }
 
@@ -111,6 +108,7 @@ class Client(
         val id: Int,
         val socket: WebSocket,
         var name: String,
+        var roomId: String? = null,
         var level: Int = 0) {
 
     lateinit var grid: Grid

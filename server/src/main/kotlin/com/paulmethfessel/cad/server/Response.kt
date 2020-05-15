@@ -16,6 +16,8 @@ object Response {
             = join(type("setPlayers"), v("ids", *ids.toTypedArray()), v("names", *names.toTypedArray()))
     fun left(client: Client) = join(type("left"), client(client))
 
+    fun joinedWaitingRoom(roomId: String) = join(type("joinedWaiting"), v("id", roomId))
+
     fun startGame(width: Int, height: Int, delay: Int)
             = join(type("gameStart"), v("size", width.toString(), height.toString()), v("delay", delay.toString()))
     fun setGrid(client: Client, grid: Grid)

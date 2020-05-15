@@ -6,7 +6,7 @@ import org.slf4j.MarkerFactory
 
 private val tag = MarkerFactory.getMarker("Server")
 
-object Server {
+object Server: ClientListener() {
 
     val log = LoggerFactory.getLogger(Server::class.java)
 
@@ -18,11 +18,33 @@ object Server {
 
     fun start(config: Config) {
         _config = config
-        rooms += WaitingRoom()
-
         GridPool.run()
-
         Clients.runServer()
+    }
+
+    override fun onMessage(client: Client, message: Message) {
+        if (message.type == MessageType.ID) {
+            val id = (message as RoomIdMessage).id
+            if (id == null || rooms.find { it.id == id } == null) {
+                createNewWaitingRoom(client)
+            } else {
+                val roomWithId = rooms.find { it.id == id }
+                if (roomWithId != null) {
+                    val success = roomWithId.add(client)
+                    if (!success) {
+                        createNewWaitingRoom(client)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun createNewWaitingRoom(client: Client) {
+        val allIds = rooms.map { it.id }
+        val newId = IdGenerator.generateRandomId(allIds)
+        val newRoom = WaitingRoom(newId)
+        rooms += newRoom
+        newRoom.add(client)
     }
 
     fun closeRoom(room: Room) {
@@ -53,7 +75,6 @@ object Server {
     fun reset() {
         rooms.toList().forEach { closeRoom(it) }
         games.toList().forEach { closeRoom(it) }
-        openRoom(WaitingRoom())
     }
 
     fun close() {
