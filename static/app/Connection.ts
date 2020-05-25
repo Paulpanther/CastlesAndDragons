@@ -10,6 +10,8 @@ export default class Connection {
 
     private static connection: WebSocket;
 
+    public static open = false;
+
     public static init() {
         const server = process.env.SERVER || "localhost:6789";
         this.connection = new WebSocket("ws://" + server);
@@ -17,7 +19,12 @@ export default class Connection {
         this.connection.onmessage = (event) => {
             console.log(event.data);
             this.listeners.forEach(l => l.onMessage(Message.parse(event.data)));
-        }
+        };
+
+        this.connection.onopen = () => {
+            this.open = true;
+            this.listeners.forEach(l => l.onOpen());
+        };
     }
 
     public static send(message: string) {
@@ -40,7 +47,9 @@ export default class Connection {
 @Component
 export abstract class ConnectionListener extends Vue {
 
-    abstract onMessage(message: Message);
+    public abstract onMessage(message: Message);
+
+    public onOpen() {}
 
     protected send(message: string) {
         Connection.send(message);
@@ -74,6 +83,14 @@ export class Message {
     }
 
     // #### SEND ####
+
+    public static enterRoom(id?: string): string {
+        if (id) {
+            return Message.join(this.type("enterRoom"), this.v("id", id));
+        } else {
+            return Message.join(this.type("enterRoom"));
+        }
+    }
 
     public static newName(newName: string) { return Message.join(this.type("name"), this.v("name", newName)) }
 

@@ -1,6 +1,7 @@
 <template lang="pug">
     div
-        h1 Waiting Room
+        h1(v-show="!roomIdFromServer") Waiting Room
+        h1(v-show="roomIdFromServer") Waiting Room \#{{ roomId }}
         div(v-if="self !== null")
             h3 You:
             input(v-model="name")
@@ -13,13 +14,17 @@
 </template>
 
 <script lang="ts">
+    import Vue from "vue";
     import Component from "vue-class-component";
     import {Watch} from "vue-property-decorator";
     import * as _ from "lodash";
-    import {ConnectionListener, Message} from "../Connection";
+    import Connection, {ConnectionListener, Message} from "../Connection";
     import Player from "../model/Player";
     import {EventBus} from "../App.vue";
     import {TickingTimer} from "../components/util";
+
+    Vue.prototype.$location = window.location.hash;
+    console.log(Vue.prototype.$location);
 
     @Component
     export default class WaitingRoom extends ConnectionListener {
@@ -32,6 +37,9 @@
         public isGameStarting = false;
         public countDown = 0;
 
+        public roomId: string = "";
+        public roomIdFromServer = false;
+
         private completedHandshake = false;
         private gameStartTimer = new TickingTimer();
 
@@ -41,6 +49,15 @@
                 this.self = event.self;
                 this.connectedPlayers = event.others;
             });
+
+            if (Connection.open) {
+                this.onOpen();
+            }
+        }
+
+        public onOpen() {
+            this.roomId = this.$location.slice(1) || undefined;
+            this.send(Message.enterRoom(this.roomId));
         }
 
         public onMessage(message: Message) {
@@ -49,6 +66,7 @@
 
         private callMethodForMessage(message: Message) {
             switch (message.get("type")) {
+                case "joinedWaiting": return this.setRoomId(message);
                 case "nameAndId": return this.onNameAndIdChange(message);
                 case "setPlayers": return this.onSetPlayers(message);
                 case "gameStartsIn": return this.onGameStartsIn(message);
@@ -56,6 +74,11 @@
                 case "gameStart": return this.onGameStarts(message);
                 case "error": return this.callMethodForError(message);
             }
+        }
+
+        private setRoomId(message: Message) {
+            this.roomIdFromServer = true;
+            this.roomId = message.get("id");
         }
 
         private callMethodForError(message: Message) {

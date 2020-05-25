@@ -127,10 +127,12 @@ class Client(
     }
 }
 
-open class ClientListener {
+open class ClientListener(private val doAddListener: Boolean = true) {
 
     init {
-        Clients.addListener(this)
+        if (doAddListener) {
+            Clients.addListener(this)
+        }
     }
 
     open fun onJoined(client: Client) {}

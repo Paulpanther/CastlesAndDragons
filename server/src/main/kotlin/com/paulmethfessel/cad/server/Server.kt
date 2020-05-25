@@ -6,7 +6,7 @@ import org.slf4j.MarkerFactory
 
 private val tag = MarkerFactory.getMarker("Server")
 
-object Server: ClientListener() {
+object Server: ClientListener(false) {
 
     val log = LoggerFactory.getLogger(Server::class.java)
 
@@ -19,11 +19,12 @@ object Server: ClientListener() {
     fun start(config: Config) {
         _config = config
         GridPool.run()
+        Clients.addListener(this)
         Clients.runServer()
     }
 
     override fun onMessage(client: Client, message: Message) {
-        if (message.type == MessageType.ID) {
+        if (message.type == MessageType.ENTERROOM) {
             val id = (message as RoomIdMessage).id
             if (id == null || rooms.find { it.roomId == id } == null) {
                 createNewWaitingRoom(client)

@@ -1,12 +1,15 @@
 package com.paulmethfessel.cad.util
 
+import java.util.stream.Collectors
+
 object Random {
 
     fun getString(length: Int, source: String): String {
         return java.util.Random().ints(length.toLong(), 0, source.length)
                 .boxed()
                 .map { source[it] }
-                .toString()
+                .collect(Collectors.toList())
+                .joinToString("")
     }
 
     fun <T> shuffle(list: List<T>): List<T> {

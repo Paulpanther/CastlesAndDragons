@@ -16,6 +16,10 @@ class WaitingRoom(
 
     private val joinLock = ReentrantLock()
 
+    init {
+        sendToPlayers(Response.joinedWaitingRoom(roomId))
+    }
+
     fun add(client: Client): Boolean {
         joinLock.withLock {
             return if (players.size + 1 <= Server.config.playerCount) {

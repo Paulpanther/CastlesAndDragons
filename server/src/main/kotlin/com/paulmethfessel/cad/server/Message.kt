@@ -8,7 +8,7 @@ import java.lang.Exception
 private val tag = MarkerFactory.getMarker("MESSAGE_PARSER")
 
 enum class MessageType {
-    NAME, MOVE, FINISHED, INVALID, ID
+    NAME, MOVE, FINISHED, INVALID, ENTERROOM
 }
 
 open class Message(
@@ -26,7 +26,7 @@ open class Message(
                     MessageType.NAME -> parseName(args)
                     MessageType.MOVE -> parseMove(args)
                     MessageType.FINISHED -> Message(MessageType.FINISHED)
-                    MessageType.ID -> parseId(args)
+                    MessageType.ENTERROOM -> parseId(args)
                     else -> Message(MessageType.INVALID)
                 }
             } catch (e: Exception) {  // Catch everything, so messages cannot crash the server
@@ -90,5 +90,5 @@ open class Message(
 }
 
 class NameMessage(val name: String): Message(MessageType.NAME)
-class RoomIdMessage(val id: String?): Message(MessageType.ID)
+class RoomIdMessage(val id: String?): Message(MessageType.ENTERROOM)
 class MoveMessage(val from: Pos?, val to: Pos?, val up: Orientation?, val item: Item): Message(MessageType.MOVE)
