@@ -3,7 +3,7 @@ package com.paulmethfessel.cad.server
 import com.paulmethfessel.cad.util.Random
 
 private const val idLength = 8
-private val source = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+private const val source = "abcdefghijklmnopqrstuvwxyz0123456789"
 
 object IdGenerator {
 

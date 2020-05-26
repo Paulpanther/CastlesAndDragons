@@ -1,7 +1,7 @@
 <template lang="pug">
     div
-        h1(v-show="!roomIdFromServer") Waiting Room
-        h1(v-show="roomIdFromServer") Waiting Room \#{{ roomId }}
+        h1 Waiting Room
+        h2(v-show="roomIdFromServer") {{ $location.href }}
         div(v-if="self !== null")
             h3 You:
             input(v-model="name")
@@ -23,7 +23,7 @@
     import {EventBus} from "../App.vue";
     import {TickingTimer} from "../components/util";
 
-    Vue.prototype.$location = window.location.hash;
+    Vue.prototype.$location = window.location;
     console.log(Vue.prototype.$location);
 
     @Component
@@ -46,6 +46,7 @@
         public mounted() {
             this.startListening();
             EventBus.$on("gameend", (event) => {
+                this.startListening();
                 this.self = event.self;
                 this.connectedPlayers = event.others;
             });
@@ -56,7 +57,7 @@
         }
 
         public onOpen() {
-            this.roomId = this.$location.slice(1) || undefined;
+            this.roomId = this.$location.hash.slice(1) || undefined;
             this.send(Message.enterRoom(this.roomId));
         }
 
@@ -79,6 +80,7 @@
         private setRoomId(message: Message) {
             this.roomIdFromServer = true;
             this.roomId = message.get("id");
+            this.$location.hash = this.roomId;
         }
 
         private callMethodForError(message: Message) {
