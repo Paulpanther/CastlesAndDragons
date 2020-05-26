@@ -60,6 +60,9 @@ class WaitingRoom(
         players.remove(client)
         timer.stop()
         sendPlayersList()
+        if (players.isEmpty()) {
+            close()
+        }
     }
 
     private fun sendPlayersList() {
